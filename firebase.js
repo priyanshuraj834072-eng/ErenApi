@@ -19,7 +19,7 @@ import {
 
 // ErenApi Firebase configuration
 const firebaseConfig = {
-  apiKey: "PASTE_YOUR_FIREBASE_API_KEY",
+  apiKey: "AIzaSyDHVz6WjtPHEAjp9aq9bN_bfioqtA8LOlY",
   authDomain: "erenapi.firebaseapp.com",
   databaseURL: "https://erenapi-default-rtdb.firebaseio.com",
   projectId: "erenapi",
