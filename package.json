@@ -1,0 +1,12 @@
+{
+  "name": "erenapi",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.5.0"
+  }
+}
