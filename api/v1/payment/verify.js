@@ -3,6 +3,7 @@ import { createHash, timingSafeEqual } from "node:crypto";
 import { getFirebaseApp } from "../../../lib/firebase.js";
 import { parseFamPayEmail } from "../../../lib/emailParser.js";
 import { searchPaymentEmails, GmailNotConnectedError } from "../../../lib/gmail.js";
+import { compareNames } from "../../../lib/nameMatch.js";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -60,6 +61,8 @@ export default async function handler(req, res) {
     const utr = body.utr == null ? null : String(body.utr).trim().toUpperCase();
     const transactionId = body.transaction_id == null ? null : String(body.transaction_id).trim().toUpperCase();
     const amount = body.amount == null ? null : Number(body.amount);
+    const expectedName = body.expected_name == null ? null : String(body.expected_name).trim();
+    const strictName = body.strict_name === true;
 
     if (!utr && !transactionId) {
       return reply(res, 400, { success: false, message: "Send utr or transaction_id" });
@@ -72,6 +75,10 @@ export default async function handler(req, res) {
     }
     if (amount !== null && (!Number.isFinite(amount) || amount <= 0)) {
       return reply(res, 400, { success: false, message: "amount must be a positive number" });
+    }
+
+    if (expectedName !== null && (expectedName.length < 2 || expectedName.length > 100)) {
+      return reply(res, 400, { success: false, message: "expected_name must be 2 to 100 characters" });
     }
 
     // Look in the merchant's own inbox
@@ -102,6 +109,23 @@ export default async function handler(req, res) {
       });
     }
 
+    // Optional name check: compare the customer's KYC name with the payer name
+    let nameMatch = null;
+    if (expectedName !== null) {
+      nameMatch = compareNames(expectedName, match.senderName);
+      const ok = strictName ? nameMatch === "full" : nameMatch !== "none";
+      if (!ok) {
+        // Payment is NOT marked as used, so a correct retry can still succeed
+        return reply(res, 200, {
+          success: true,
+          received: false,
+          name_match: nameMatch,
+          sender_name: match.senderName,
+          message: "Payment found but the payer name does not match"
+        });
+      }
+    }
+
     // Duplicate protection: only the first verification of a payment succeeds
     const paymentKey = (match.transactionId || match.utr).replace(/[.#$/\[\]]/g, "_");
     const result = await db.ref(`verifiedPayments/${uid}/${paymentKey}`).transaction((current) => {
@@ -127,6 +151,7 @@ export default async function handler(req, res) {
       utr: match.utr,
       sender_name: match.senderName,
       date: match.date,
+      ...(nameMatch ? { name_match: nameMatch } : {}),
       message: "Payment received successfully"
     });
   } catch (error) {
