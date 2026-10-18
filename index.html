@@ -4,286 +4,125 @@
 <meta charset="UTF-8">
 <meta name="google-site-verification" content="FwQbJu2pJm4fdz_meqjt_7W7yGxSwsZrPunms2AQ5iM" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#060a0e">
-<meta name="description" content="ErenApi: verify UPI payments by UTR or transaction ID with one API request.">
+<meta name="theme-color" content="#5a3cff">
+<meta name="description" content="ErenApi checks a UPI payment by UTR or transaction ID against your own inbox and answers yes or no.">
 <title>ErenApi: Payment Verification API</title>
-<style>
-:root{--bg:#060a0e;--panel:#0b1117;--panel2:#101820;--line:#1b2833;--accent:#22d3ee;--dim:#0b3b4a;--text:#eef4f8;--muted:#8a9bab;--warn:#f0c674;--bad:#ff6b6b;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace}
-*{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;line-height:1.6;background-image:linear-gradient(rgba(34,211,238,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(34,211,238,.045) 1px,transparent 1px);background-size:44px 44px}
-a{color:inherit;text-decoration:none}button{font:inherit;cursor:pointer}button:disabled{opacity:.7;cursor:wait}
-:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.container{width:min(1100px,92%);margin:auto}
-header{position:sticky;top:0;z-index:10;background:rgba(6,9,8,.92);border-bottom:1px solid var(--line);backdrop-filter:blur(12px)}
-nav{min-height:66px;display:flex;align-items:center;justify-content:space-between;gap:16px}
-.logo{font:800 22px var(--mono);letter-spacing:-1px}.logo span{color:var(--accent)}
-.nav-links{display:flex;align-items:center;gap:18px;color:var(--muted);font:13px var(--mono)}.nav-links a:hover{color:var(--accent)}
-.button{display:inline-flex;justify-content:center;align-items:center;gap:8px;padding:11px 18px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--text);font-family:var(--mono);font-size:13px;transition:.15s}
-.button:hover{border-color:var(--accent)}.button.primary{background:var(--accent);border-color:var(--accent);color:#03141b;font-weight:700}
-.btn-spinner{width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;display:inline-block;animation:spin .6s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
-.hero{padding:70px 0 50px}
-.hero-grid{display:grid;grid-template-columns:1fr 1.05fr;gap:40px;align-items:center}
-.live{display:inline-flex;align-items:center;gap:8px;font:12px var(--mono);color:var(--accent);border:1px solid var(--dim);background:#07161e;padding:6px 12px;border-radius:4px;margin-bottom:22px}
-.dot{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent);animation:pulse 2s infinite}@keyframes pulse{50%{opacity:.35}}
-h1{font:800 clamp(34px,5.4vw,56px)/1.08 var(--mono);letter-spacing:-2px}
-.hero p.lead{margin:20px 0 28px;color:var(--muted);font-size:16px;max-width:460px}
-.hero-actions{display:flex;flex-wrap:wrap;gap:10px}
-.term{background:#05090d;border:1px solid var(--line);border-radius:10px;overflow:hidden;box-shadow:0 0 60px rgba(34,211,238,.08)}
-.term-bar{display:flex;align-items:center;gap:7px;padding:11px 14px;border-bottom:1px solid var(--line);background:var(--panel)}
-.term-bar i{width:10px;height:10px;border-radius:50%;background:#2a3844}.term-bar span{margin-left:8px;color:var(--muted);font:12px var(--mono)}
-.term pre{padding:18px;min-height:300px;font:12.5px/1.75 var(--mono);color:#c3d4e0;overflow-x:auto;white-space:pre-wrap;word-break:break-word}
-.k{color:var(--accent)}.s{color:#9fd8ff}.n{color:var(--warn)}.c{color:#5e7080}
-.caret{display:inline-block;width:7px;height:14px;background:var(--accent);vertical-align:-2px;animation:blink 1s steps(2) infinite}@keyframes blink{to{opacity:0}}
-section{padding:64px 0}
-.section-heading{max-width:620px;margin-bottom:30px}
-.tag{display:inline-block;font:12px var(--mono);color:var(--accent);margin-bottom:10px}
-h2{font:800 clamp(26px,4.2vw,36px)/1.2 var(--mono);letter-spacing:-1px}.section-heading p{margin-top:12px;color:var(--muted)}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-.card{padding:22px;background:var(--panel);border:1px solid var(--line);border-left:2px solid var(--accent);border-radius:6px}
-.card h3{margin-bottom:8px;font:700 16px var(--mono)}.card p{color:var(--muted);font-size:14px}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:22px}
-.ep{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding-bottom:16px;border-bottom:1px solid var(--line);font:14px var(--mono)}
-.m{background:var(--dim);color:var(--accent);padding:3px 9px;border-radius:4px;font-weight:700}
-.copy{margin-left:auto;padding:6px 12px;font-size:12px}
-.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px}
-.cols h4,.label-sm{font:12px var(--mono);color:var(--muted);margin-bottom:8px;font-weight:400}
-code.block,pre.block{display:block;background:#05090d;border:1px solid var(--line);border-radius:6px;padding:14px;font:12.5px/1.7 var(--mono);color:#c3d4e0;overflow-x:auto;white-space:pre}
-.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:22px 0 10px}
-.tab{padding:7px 12px;border:1px solid var(--line);border-radius:4px;background:transparent;color:var(--muted);font:12px var(--mono)}
-.tab[aria-selected=true]{border-color:var(--accent);color:var(--accent);background:#07161e}
-table{width:100%;border-collapse:collapse;margin-top:22px;font-size:13px}
-th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
-th{font:12px var(--mono);color:var(--muted);font-weight:400}td:first-child{font-family:var(--mono);color:var(--accent);white-space:nowrap}td:nth-child(2){font-family:var(--mono);color:var(--muted)}
-.tw{overflow-x:auto}
-.field{display:block;margin-bottom:12px}.field span{display:block;font:12px var(--mono);color:var(--muted);margin-bottom:5px}
-.in,.key-box{width:100%;padding:11px 12px;background:#05090d;color:var(--text);border:1px solid var(--line);border-radius:6px;font:13px var(--mono)}
-.in:focus,.key-box:focus{border-color:var(--accent);outline:0}
-.out{min-height:200px}
-.qr-box{display:grid;place-items:center;min-height:200px;border:1px dashed var(--line);border-radius:6px;margin-top:12px;color:var(--muted);font:12px var(--mono);padding:10px;text-align:center}
-.qr-box img{max-width:200px;background:#fff;padding:8px;border-radius:6px}
-.cta{padding:38px 22px;text-align:center;background:linear-gradient(135deg,#0a1d28,var(--panel));border:1px solid var(--dim);border-radius:10px}
-.cta p.sub{max-width:520px;margin:12px auto 22px;color:var(--muted)}
-.status{max-width:600px;margin:16px auto 0;color:var(--muted);font:13px var(--mono);overflow-wrap:anywhere}
-.dashboard{max-width:680px;margin:24px auto 0;padding:22px;text-align:left;background:#05090d;border:1px solid var(--dim);border-radius:8px}
-.dashboard-row{display:flex;justify-content:space-between;gap:20px;padding:12px 0;border-bottom:1px solid var(--line)}
-.label{color:var(--muted)}.value{overflow-wrap:anywhere;text-align:right}
-.dashboard-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}.hidden{display:none!important}.ico{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}.keywrap{position:relative}.keywrap .ico{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--accent);width:17px;height:17px}.keywrap .key-box{padding-left:42px}
-footer{padding:26px 0;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
-.footer-inner{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px}
-.footer-inner a:hover{color:var(--accent)}
-@media(max-width:800px){.hero-grid,.cols,.grid{grid-template-columns:1fr}.hero{padding-top:44px}.nav-links .optional{display:none}.dashboard-row{flex-direction:column;gap:2px}.value{text-align:left}.copy{margin-left:0}}
-@media(prefers-reduced-motion:reduce){*{animation:none!important;scroll-behavior:auto!important}}
-</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
 </head>
 <body>
 <header><div class="container"><nav>
-<a href="#" class="logo">Eren<span>Api</span></a>
-<div class="nav-links"><a class="optional" href="#overview">Overview</a><a href="#docs">Docs</a><a href="#console">Try it</a><a class="button primary" href="#get-started">Get started</a></div>
+<a href="/" class="logo"><span class="mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg></span>Eren<span>Api</span></a>
+<div class="nav-links"><a href="/docs.html">Docs</a><a class="btn btn-primary btn-sm" href="#get-started">Get API key</a></div>
 </nav></div></header>
 
 <main>
-<section class="hero"><div class="container hero-grid">
+<section class="hero" style="padding-bottom:76px"><div class="container hero-grid">
 <div>
-<div class="live"><span class="dot"></span>API v1 is live</div>
-<h1>Confirm the payment before you ship the order.</h1>
-<p class="lead">Send a UTR or transaction ID. ErenApi checks it against the payment emails in your own inbox and replies with a clear yes or no, so the same payment is never credited twice.</p>
-<div class="hero-actions"><a href="#get-started" class="button primary">Get your API key</a><a href="#docs" class="button">See how it works</a></div>
+<h1>Check the payment, not the screenshot.</h1>
+<p class="lead">Send a UTR or transaction ID. ErenApi looks it up in your payment emails and tells you yes or no.</p>
+<div class="hero-actions"><a href="#get-started" class="btn btn-light">Get API key</a><a href="/docs.html" class="btn btn-ghost">Read the docs</a></div>
+<div class="chips">
+<span><svg class="ico" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>Your own inbox</span>
+<span><svg class="ico" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>Exact amount</span>
+<span><svg class="ico" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>No double credit</span>
 </div>
-<div class="term" aria-label="Example request and response">
-<div class="term-bar"><i></i><i></i><i></i><span>verify.sh</span></div>
-<pre id="termOut"></pre>
 </div>
-</div></section>
-
-<section id="overview"><div class="container">
-<div class="section-heading"><span class="tag">// overview</span><h2>Built to answer one question.</h2><p>Has this customer actually paid? ErenApi checks real payment emails, not screenshots or claims.</p></div>
-<div class="grid">
-<article class="card"><h3>Private key per merchant</h3><p>Your key belongs to your account only. Replace it with a new one whenever you want.</p></article>
-<article class="card"><h3>Reads only your inbox</h3><p>Connect the Gmail account that receives your payment alerts. Other merchants never touch it.</p></article>
-<article class="card"><h3>Match by UTR or ID</h3><p>Use the UTR, or the transaction ID when no UTR exists. Add the amount to require an exact match. A payment that was already verified is flagged.</p></article>
-</div></div></section>
-
-<section id="docs"><div class="container">
-<div class="section-heading"><span class="tag">// docs</span><h2>API reference</h2><p>Two endpoints. Bearer key in the header, JSON in and out.</p></div>
-<div class="panel">
-<div class="ep"><span class="m">POST</span><code>/api/v1/payment/verify</code><button class="button copy" type="button" id="copyCurl">Copy cURL</button></div>
-<div class="label-sm" style="margin-top:16px">Header</div>
-<code class="block">Authorization: Bearer YOUR_API_KEY</code>
-<div class="cols">
-<div><h4>Request by UTR</h4><code class="block">{
-  "utr": "428917305561",
-  "amount": 250
-}</code></div>
-<div><h4>Request by transaction ID</h4><code class="block">{
-  "transaction_id": "FMPIB2048117735",
-  "amount": 250
-}</code></div>
-</div>
-<p style="color:var(--muted);font-size:13px;margin-top:12px">amount is optional. When sent, it must match exactly.</p>
-<div class="tabs" role="tablist">
-<button class="tab" role="tab" aria-selected="true" data-r="ok">Payment received</button>
-<button class="tab" role="tab" aria-selected="false" data-r="nf">Not found</button>
-<button class="tab" role="tab" aria-selected="false" data-r="dup">Already verified</button>
-<button class="tab" role="tab" aria-selected="false" data-r="err">Error</button>
-</div>
-<pre class="block" id="respView"></pre>
-<div class="tw"><table>
-<tr><th>Field</th><th>Type</th><th>Meaning</th></tr>
-<tr><td>success</td><td>boolean</td><td>The request itself went through.</td></tr>
-<tr><td>received</td><td>boolean</td><td>The payment was found and matched.</td></tr>
-<tr><td>amount</td><td>number</td><td>Amount that came in. null when nothing matched.</td></tr>
-<tr><td>transaction_id</td><td>string</td><td>Matched transaction ID.</td></tr>
-<tr><td>utr</td><td>string</td><td>UTR from the payment email, if present.</td></tr>
-<tr><td>sender_name</td><td>string</td><td>Name of the payer, or null.</td></tr>
-<tr><td>already_verified</td><td>boolean</td><td>Same payment verified before. Never credit it twice.</td></tr>
-</table></div>
-<div class="tw"><table>
-<tr><th>HTTP</th><th></th><th>When</th></tr>
-<tr><td>200</td><td></td><td>Verification ran. Check received for the result.</td></tr>
-<tr><td>400</td><td></td><td>Broken JSON, or missing or badly formatted utr / transaction_id.</td></tr>
-<tr><td>401</td><td></td><td>API key missing or wrong.</td></tr>
-<tr><td>500</td><td></td><td>Server problem, usually the Gmail connection.</td></tr>
-</table></div>
-</div>
-<div class="panel" style="margin-top:16px">
-<div class="ep"><span class="m">GET</span><code>/api/v1/qr</code></div>
-<p style="color:var(--muted);font-size:14px;margin:14px 0 10px">Optional. Returns a standard upi://pay QR as an SVG image. Skip it if you already have your own QR.</p>
-<code class="block" id="qrUrlDoc"></code>
+<div class="stage" id="stage" aria-label="Example: a payment email is matched and verified">
+<article class="paper">
+<div class="p-top"><span>You have successfully received</span><span class="p-chip">email</span></div>
+<div class="p-amt">₹250.0</div>
+<div class="p-from">from <b>RAHUL S</b></div>
+<dl>
+<div><dt>Transaction ID</dt><dd>FMPIB2048117735</dd></div>
+<div><dt>UTR</dt><dd>428917305561</dd></div>
+<div><dt>Date</dt><dd>18 Oct 2026, 14:42 IST</dd></div>
+</dl>
+<div class="scan"></div><div class="stamp">Matched</div>
+</article>
+<div class="link">ErenApi checks the email</div>
+<article class="verdict"><pre>{
+  <span class="k">"received"</span>: <span class="n">true</span>,
+  <span class="k">"amount"</span>: <span class="n">250</span>,
+  <span class="k">"utr"</span>: <span class="s">"428917305561"</span>,
+  <span class="k">"sender_name"</span>: <span class="s">"RAHUL S"</span>
+}</pre></article>
 </div>
 </div></section>
 
-<section id="console"><div class="container">
-<div class="section-heading"><span class="tag">// console</span><h2>Try it live</h2><p>Run a real request with your own key and see the exact reply your site will receive. Don't paste your key on a shared computer.</p></div>
-<div class="cols" style="margin-top:0">
-<div class="panel">
-<label class="field"><span>API key</span><input class="in" id="tcKey" type="password" autocomplete="off" placeholder="er_live_..."></label>
-<label class="field"><span>Transaction ID (optional)</span><input class="in" id="tcTid" placeholder="FMPIB2048117735"></label>
-<label class="field"><span>UTR (optional)</span><input class="in" id="tcUtr" placeholder="428917305561"></label>
-<label class="field"><span>Amount (optional)</span><input class="in" id="tcAmt" inputmode="decimal" placeholder="100"></label>
-<button class="button primary" id="tcSend" type="button">Send request</button>
-</div>
-<div class="panel"><div class="label-sm">Response</div><pre class="block out" id="tcOut">Send a request to see the result.</pre></div>
-</div>
-<div class="cols">
-<div class="panel">
-<div class="label-sm">UPI QR generator</div>
-<label class="field"><span>UPI ID</span><input class="in" id="qrUpi" placeholder="merchant@upi"></label>
-<label class="field"><span>Payee name</span><input class="in" id="qrName" placeholder="My Store"></label>
-<label class="field"><span>Amount</span><input class="in" id="qrAmt" inputmode="decimal" placeholder="100"></label>
-<label class="field"><span>Note</span><input class="in" id="qrNote" placeholder="Order 4821"></label>
-<button class="button" id="qrGo" type="button">Generate QR</button>
-</div>
-<div class="panel"><div class="label-sm">Preview</div><div class="qr-box" id="qrBox">Enter a UPI ID and generate.</div></div>
+<section><div class="container">
+<div class="head"><h2>How it works</h2><p>Three steps from "I paid" to "confirmed".</p></div>
+<div class="steps">
+<div class="step"><b>1</b><h3>Customer pays</h3><p>They pay you on UPI and send you the UTR or transaction ID.</p></div>
+<div class="step"><b>2</b><h3>You send us the ID</h3><p>Your site or bot passes that ID to ErenApi, with the amount if you want it checked.</p></div>
+<div class="step"><b>3</b><h3>You get the answer</h3><p>ErenApi checks your inbox and replies: paid, or not paid.</p></div>
 </div>
 </div></section>
 
-<section id="get-started"><div class="container"><div class="cta">
-<span class="tag">// get started</span><h2 id="ctaTitle">Ready to build with ErenApi?</h2>
-<p class="sub" id="ctaDescription">Sign in with Google to create your merchant account. Only your Gmail address is used for the basic account profile.</p>
-<button class="button primary" id="startButton" type="button">Continue with Google</button>
+<section id="get-started" style="padding-top:20px"><div class="container">
+<div class="gs-card"><div class="gs" id="gs">
+<div class="gs-copy">
+<h2 id="ctaTitle">Ready to start?</h2>
+<p id="ctaDescription">Sign in with Google to create your merchant account. Only your Gmail address is used for the basic account profile.</p>
+<button class="btn btn-primary" id="startButton" type="button">Continue with Google</button>
 <p class="status" id="status" role="status" aria-live="polite">You are not signed in.</p>
+</div>
 <div id="dashboard" class="dashboard hidden">
-<span class="tag">// merchant dashboard</span><h3 style="font:700 22px var(--mono);margin-bottom:10px">Your account</h3>
+<h3 style="font-size:22px;margin-bottom:6px">Your account</h3>
 <div class="dashboard-row"><span class="label">Signed-in email</span><strong class="value" id="accountEmail">—</strong></div>
 <div class="dashboard-row"><span class="label">Account status</span><strong class="value">Registered</strong></div>
 <div class="dashboard-row"><span class="label">Payment API</span><strong class="value" id="paymentApiStatus">Verification backend pending</strong></div>
-<div style="margin-top:20px">
-<h3 style="font:700 18px var(--mono);margin-bottom:8px">API key</h3>
+<div style="margin-top:22px">
+<h3 style="font-size:18px;margin-bottom:6px">API key</h3>
 <p style="color:var(--muted);font-size:14px;margin-bottom:14px">Your secret key. Keep it private and never put it in frontend code.</p>
-<div id="keyEmpty"><button class="button primary" id="generateKeyButton" type="button">Generate API key</button></div>
+<div id="keyEmpty"><button class="btn btn-primary" id="generateKeyButton" type="button">Generate API key</button></div>
 <div id="apiKeyResult" class="hidden">
 <div class="keywrap"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><input id="apiKeyOutput" class="key-box" type="password" readonly autocomplete="off" aria-label="Your API key"></div>
-<div class="dashboard-actions"><button class="button" id="toggleKeyButton" type="button"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><span>Show key</span></button><button class="button" id="copyKeyButton" type="button"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg><span>Copy key</span></button></div>
-<div class="dashboard-actions"><button class="button" id="regenKeyButton" type="button"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/></svg><span>Generate new key</span></button></div>
-<p style="color:var(--warn);font-size:13px;margin-top:12px">A new key replaces this one. The old key stops working immediately.</p>
+<div class="dashboard-actions">
+<button class="btn" id="toggleKeyButton" type="button"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg><span>Show key</span></button>
+<button class="btn" id="copyKeyButton" type="button"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg><span>Copy key</span></button>
+<button class="btn btn-primary" id="regenKeyButton" type="button"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/></svg><span>Generate new key</span></button>
+</div>
 </div>
 <p id="keyStatus" class="status" role="status" aria-live="polite"></p>
 </div>
-<div class="dashboard-actions"><button class="button" id="logoutButton" type="button">Sign out</button></div>
+<div class="dashboard-actions" style="margin-top:20px"><button class="btn" id="logoutButton" type="button">Sign out</button></div>
 </div>
-</div></div></section>
+</div></div>
+</div></section>
 </main>
 
+<dialog id="confirmDialog" aria-labelledby="dlgTitle">
+<h3 id="dlgTitle">Generate a new key?</h3>
+<p>Your current key stops working right away. Anything that uses it will need the new key.</p>
+<div class="dlg-actions"><button class="btn" id="dlgCancel" type="button">Cancel</button><button class="btn btn-primary" id="dlgOk" type="button">Generate new key</button></div>
+</dialog>
+
 <footer><div class="container footer-inner">
-<a href="#" class="logo">Eren<span>Api</span></a>
+<a href="/" class="logo"><span class="mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg></span>Eren<span>Api</span></a>
 <span>© <span id="year"></span> ErenApi</span>
-<div style="display:flex;gap:16px;flex-wrap:wrap"><a href="/privacy.html">Privacy policy</a><a href="/terms.html">Terms of service</a></div>
+<div style="display:flex;gap:18px;flex-wrap:wrap"><a href="/docs.html">Docs</a><a href="/privacy.html">Privacy policy</a><a href="/terms.html">Terms of service</a></div>
 </div></footer>
 
 <script type="module">
 import {auth,provider,db,ref,set,signInWithPopup,signOut,onAuthStateChanged} from "./firebase.js";
 const $=id=>document.getElementById(id);
-const BASE=location.origin;
 $("year").textContent=new Date().getFullYear();
+requestAnimationFrame(()=>$("stage").classList.add("run"));
 
-/* hero terminal */
-const termOut=$("termOut");
-const reqText=`<span class="c">$</span> <span class="k">curl</span> -X POST ${BASE}/api/v1/payment/verify \\
-  -H <span class="s">"Authorization: Bearer er_live_••••"</span> \\
-  -d <span class="s">'{"utr":"428917305561","amount":250}'</span>
-`;
-const resText=`
-{
-  <span class="k">"success"</span>: <span class="n">true</span>,
-  <span class="k">"received"</span>: <span class="n">true</span>,
-  <span class="k">"amount"</span>: <span class="n">250</span>,
-  <span class="k">"currency"</span>: <span class="s">"INR"</span>,
-  <span class="k">"transaction_id"</span>: <span class="s">"FMPIB2048117735"</span>,
-  <span class="k">"utr"</span>: <span class="s">"428917305561"</span>,
-  <span class="k">"message"</span>: <span class="s">"Payment received successfully"</span>
-}`;
-if(matchMedia("(prefers-reduced-motion:reduce)").matches){termOut.innerHTML=reqText+resText;}
-else{
-  const plain=reqText.replace(/<[^>]+>/g,"");let i=0;
-  const tick=()=>{i+=2;termOut.innerHTML=plain.slice(0,i).replace(/&/g,"&amp;")+'<span class="caret"></span>';
-    if(i<plain.length)setTimeout(tick,14);else setTimeout(()=>{termOut.innerHTML=reqText+'<span class="c">…</span>';setTimeout(()=>{termOut.innerHTML=reqText+resText;},500);},400);};
-  tick();
+const dlg=$("confirmDialog");
+function confirmBox(){
+  return new Promise(res=>{
+    const done=v=>{dlg.close();$("dlgOk").onclick=$("dlgCancel").onclick=null;res(v);};
+    $("dlgOk").onclick=()=>done(true);$("dlgCancel").onclick=()=>done(false);
+    dlg.addEventListener("cancel",()=>res(false),{once:true});
+    dlg.showModal();
+  });
 }
 
-/* docs */
-const R={
- ok:'{\n  "success": true,\n  "received": true,\n  "amount": 250,\n  "currency": "INR",\n  "transaction_id": "FMPIB2048117735",\n  "utr": "428917305561",\n  "sender_name": "RAHUL S",\n  "date": "2026-10-18T14:42:00+05:30",\n  "message": "Payment received successfully"\n}',
- nf:'{\n  "success": true,\n  "received": false,\n  "message": "No matching payment found in the last 24 hours"\n}',
- dup:'{\n  "success": true,\n  "received": false,\n  "already_verified": true,\n  "message": "Payment was already verified"\n}',
- err:'// HTTP 401\n{\n  "success": false,\n  "message": "Invalid API key"\n}'};
-const respView=$("respView");respView.textContent=R.ok;
-document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>{
-  document.querySelectorAll(".tab").forEach(x=>x.setAttribute("aria-selected",x===t));
-  respView.textContent=R[t.dataset.r];}));
-$("qrUrlDoc").textContent=`GET ${BASE}/api/v1/qr?upi_id=merchant@upi&amount=250&name=My%20Store&note=Order%20123`;
-$("copyCurl").addEventListener("click",async()=>{
-  const c=`curl -X POST ${BASE}/api/v1/payment/verify -H "Authorization: Bearer YOUR_API_KEY" -H "Content-Type: application/json" -d '{"utr":"428917305561","amount":250}'`;
-  try{await navigator.clipboard.writeText(c);$("copyCurl").textContent="Copied";}catch{$("copyCurl").textContent="Copy failed";}
-  setTimeout(()=>$("copyCurl").textContent="Copy cURL",1500);
-});
-
-/* test console */
-$("tcSend").addEventListener("click",async()=>{
-  const key=$("tcKey").value.trim(),tid=$("tcTid").value.trim(),utr=$("tcUtr").value.trim(),amt=$("tcAmt").value.trim();
-  const out=$("tcOut");
-  if(!key){out.textContent="Enter your API key.";return;}
-  if(!tid&&!utr){out.textContent="Enter a UTR or a transaction ID.";return;}
-  const body={};if(utr)body.utr=utr;if(tid)body.transaction_id=tid;if(amt)body.amount=Number(amt);
-  const b=$("tcSend");b.disabled=true;out.textContent="Sending…";
-  try{
-    const r=await fetch("/api/v1/payment/verify",{method:"POST",headers:{"Authorization":"Bearer "+key,"Content-Type":"application/json"},body:JSON.stringify(body)});
-    const txt=await r.text();let pretty=txt;try{pretty=JSON.stringify(JSON.parse(txt),null,2);}catch{}
-    out.textContent="// HTTP "+r.status+"\n"+pretty;
-  }catch(e){out.textContent="Request failed: "+e.message;}
-  finally{b.disabled=false;}
-});
-$("qrGo").addEventListener("click",()=>{
-  const upi=$("qrUpi").value.trim(),box=$("qrBox");
-  if(!upi){box.textContent="Enter a UPI ID first.";return;}
-  const p=new URLSearchParams({upi_id:upi});
-  [["name","qrName"],["amount","qrAmt"],["note","qrNote"]].forEach(([k,id])=>{const v=$(id).value.trim();if(v)p.set(k,v);});
-  const img=new Image();img.alt="UPI QR code";img.src="/api/v1/qr?"+p;
-  img.onerror=()=>{box.textContent="QR endpoint is not available yet.";};
-  box.textContent="";box.appendChild(img);
-});
-
-/* auth + dashboard */
-const startButton=$("startButton"),logoutButton=$("logoutButton"),status=$("status"),dashboard=$("dashboard"),
+const startButton=$("startButton"),logoutButton=$("logoutButton"),status=$("status"),dashboard=$("dashboard"),gs=$("gs"),
 accountEmail=$("accountEmail"),ctaTitle=$("ctaTitle"),ctaDescription=$("ctaDescription"),
 keyEmpty=$("keyEmpty"),generateKeyButton=$("generateKeyButton"),regenKeyButton=$("regenKeyButton"),
 apiKeyResult=$("apiKeyResult"),apiKeyOutput=$("apiKeyOutput"),toggleKeyButton=$("toggleKeyButton"),
@@ -313,7 +152,7 @@ async function loadKey(){
 }
 async function generate(btn){
   if(!auth.currentUser){keyStatus.textContent="Sign in with Google first.";return;}
-  if(currentKey&&!confirm("The current key will stop working. Generate a new key?"))return;
+  if(currentKey&&!(await confirmBox()))return;
   const original=btn.innerHTML;btn.disabled=true;
   btn.innerHTML='<span class="btn-spinner" aria-hidden="true"></span> Generating…';
   keyStatus.textContent="Generating your API key…";
@@ -334,14 +173,14 @@ copyKeyButton.addEventListener("click",async()=>{
 });
 
 function showSignedInUser(user){
-  dashboard.classList.remove("hidden");accountEmail.textContent=user.email||"Email unavailable";
+  dashboard.classList.remove("hidden");gs.classList.add("in");accountEmail.textContent=user.email||"Email unavailable";
   startButton.classList.add("hidden");ctaTitle.textContent="Welcome to ErenApi";
-  ctaDescription.textContent="Your Google account is connected. Your API key is below.";
+  ctaDescription.textContent="Your Google account is connected. Your API key is next to this.";
   status.textContent="You are signed in.";
 }
 function showSignedOut(){
-  setKey(null);dashboard.classList.add("hidden");startButton.classList.remove("hidden");
-  ctaTitle.textContent="Ready to build with ErenApi?";
+  setKey(null);dashboard.classList.add("hidden");gs.classList.remove("in");startButton.classList.remove("hidden");
+  ctaTitle.textContent="Ready to start?";
   ctaDescription.textContent="Sign in with Google to create your merchant account. Only your Gmail address is used for the basic account profile.";
   status.textContent="You are not signed in.";keyStatus.textContent="";
 }
