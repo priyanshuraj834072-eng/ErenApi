@@ -4,112 +4,198 @@
 <meta charset="UTF-8">
 <meta name="google-site-verification" content="FwQbJu2pJm4fdz_meqjt_7W7yGxSwsZrPunms2AQ5iM" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#080b09">
-<meta name="description" content="ErenApi - payment verification API for developers and merchants.">
-<title>ErenApi — Payment Verification API</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#080b09">
-<meta name="description" content="ErenApi - payment verification API for developers and merchants.">
-<title>ErenApi — Payment Verification API</title>
+<meta name="theme-color" content="#060908">
+<meta name="description" content="ErenApi: verify UPI payments by UTR or transaction ID with one API request.">
+<title>ErenApi: Payment Verification API</title>
 <style>
-:root{--bg:#080b09;--panel:#101512;--border:#222c25;--green:#00e58b;--text:#f3f7f4;--muted:#96a39a}
+:root{--bg:#060908;--panel:#0c110e;--panel2:#101713;--line:#1c2a22;--green:#00e58b;--dim:#0a3a26;--text:#eef5f0;--muted:#8a9a90;--warn:#f0c674;--bad:#ff6b6b;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace}
 *{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif;line-height:1.6}
-a{color:inherit;text-decoration:none}button{font:inherit;cursor:pointer}button:disabled{opacity:.75;cursor:wait}.btn-spinner{width:15px;height:15px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;display:inline-block;animation:btnspin .65s linear infinite}@keyframes btnspin{to{transform:rotate(360deg)}}
-.container{width:min(1120px,90%);margin:auto}
-header{position:sticky;top:0;z-index:10;background:rgba(8,11,9,.94);border-bottom:1px solid var(--border);backdrop-filter:blur(14px)}
-nav{min-height:76px;display:flex;align-items:center;justify-content:space-between;gap:20px}
-.logo{font-size:25px;font-weight:800;letter-spacing:-1px}.logo span{color:var(--green)}
-.nav-links{display:flex;align-items:center;gap:20px;color:var(--muted);font-size:14px}.nav-links a:hover{color:var(--green)}
-.button{display:inline-flex;justify-content:center;align-items:center;gap:8px;padding:12px 19px;border:1px solid var(--border);border-radius:10px;background:var(--panel);color:var(--text);transition:.2s}
-.button:hover{border-color:var(--green);transform:translateY(-1px)}.button.primary{background:var(--green);border-color:var(--green);color:#06130c;font-weight:700}
-.hero{padding:100px 0 75px;text-align:center;background:radial-gradient(ellipse at 50% 0%,#123d29 0%,transparent 53%)}
-.badge{display:inline-flex;align-items:center;gap:9px;padding:8px 13px;border:1px solid #244a35;border-radius:30px;color:#b4f6d2;background:#102419;font-size:12px;letter-spacing:1px;margin-bottom:27px}
-.dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 12px #00e58b88}
-h1{max-width:850px;margin:auto;font-size:clamp(42px,8vw,76px);line-height:1.06;letter-spacing:-3px}h1 span{color:var(--green)}
-.hero p{max-width:650px;margin:25px auto;color:var(--muted);font-size:17px}
-.hero-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:30px}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);max-width:680px;margin:65px auto 0;padding:25px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
-.stat strong{display:block;font-size:15px}.stat small{color:var(--muted)}
-section{padding:75px 0}.section-heading{max-width:650px;margin-bottom:35px}
-.eyebrow{color:var(--green);font-size:12px;font-weight:bold;letter-spacing:2px;margin-bottom:12px}
-h2{font-size:clamp(30px,5vw,43px);line-height:1.2;letter-spacing:-1.5px}.section-heading p{margin-top:14px;color:var(--muted)}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
-.card{padding:25px;background:var(--panel);border:1px solid var(--border);border-radius:15px}
-.icon{display:grid;place-items:center;width:43px;height:43px;margin-bottom:19px;border-radius:11px;background:#153624;color:var(--green);font-size:20px}
-.card h3{margin-bottom:10px;font-size:18px}.card p{color:var(--muted);font-size:14px}
-.api-panel{padding:25px;background:#0b100d;border:1px solid var(--border);border-radius:15px;overflow:hidden}
-.api-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding-bottom:20px;border-bottom:1px solid var(--border)}
-.method{color:var(--green);font-weight:bold;margin-right:10px}
-pre{overflow-x:auto;padding-top:22px;color:#c5d8cb;font:13px/1.9 monospace;white-space:pre}
-.note{margin-top:18px;color:var(--muted);font-size:13px}
-.cta{padding:45px 25px;text-align:center;background:linear-gradient(135deg,#10251a,#101512);border:1px solid #254a34;border-radius:18px}
-.cta p{max-width:550px;margin:15px auto 25px;color:var(--muted)}
-.status{max-width:600px;margin:18px auto 0!important;color:var(--muted);overflow-wrap:anywhere}
-.dashboard{max-width:700px;margin:25px auto 0;padding:25px;text-align:left;background:#0b100d;border:1px solid #254a34;border-radius:15px}
-.dashboard-row{display:flex;justify-content:space-between;gap:20px;padding:13px 0;border-bottom:1px solid var(--border)}
-.dashboard-row:last-of-type{border-bottom:0}.label{color:var(--muted)}.value{overflow-wrap:anywhere;text-align:right}
-.dashboard-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}.hidden{display:none!important}
-.key-box{width:100%;padding:13px;background:#080b09;color:#f3f7f4;border:1px solid #254a34;border-radius:9px}
-footer{padding:28px 0;border-top:1px solid var(--border);color:var(--muted);font-size:13px}
-.footer-inner{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:15px}
-@media(max-width:700px){.nav-links{gap:12px}.nav-links .optional{display:none}nav{min-height:68px}.hero{padding-top:75px}h1{letter-spacing:-2px}.grid{grid-template-columns:1fr}.stats{gap:12px}.stat strong{font-size:13px}.stat small{font-size:11px}.nav-links{font-size:12px}.nav-links .button{padding:9px 10px}.dashboard{padding:18px}.dashboard-row{flex-direction:column;gap:3px}.value{text-align:left}}
+body{background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;line-height:1.6;background-image:linear-gradient(rgba(0,229,139,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,139,.045) 1px,transparent 1px);background-size:44px 44px}
+a{color:inherit;text-decoration:none}button{font:inherit;cursor:pointer}button:disabled{opacity:.7;cursor:wait}
+:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+.container{width:min(1100px,92%);margin:auto}
+header{position:sticky;top:0;z-index:10;background:rgba(6,9,8,.92);border-bottom:1px solid var(--line);backdrop-filter:blur(12px)}
+nav{min-height:66px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.logo{font:800 22px var(--mono);letter-spacing:-1px}.logo span{color:var(--green)}
+.nav-links{display:flex;align-items:center;gap:18px;color:var(--muted);font:13px var(--mono)}.nav-links a:hover{color:var(--green)}
+.button{display:inline-flex;justify-content:center;align-items:center;gap:8px;padding:11px 18px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--text);font-family:var(--mono);font-size:13px;transition:.15s}
+.button:hover{border-color:var(--green)}.button.primary{background:var(--green);border-color:var(--green);color:#04140c;font-weight:700}
+.btn-spinner{width:14px;height:14px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;display:inline-block;animation:spin .6s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+.hero{padding:70px 0 50px}
+.hero-grid{display:grid;grid-template-columns:1fr 1.05fr;gap:40px;align-items:center}
+.live{display:inline-flex;align-items:center;gap:8px;font:12px var(--mono);color:var(--green);border:1px solid var(--dim);background:#08150f;padding:6px 12px;border-radius:4px;margin-bottom:22px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 10px var(--green);animation:pulse 2s infinite}@keyframes pulse{50%{opacity:.35}}
+h1{font:800 clamp(34px,5.4vw,56px)/1.08 var(--mono);letter-spacing:-2px}
+.hero p.lead{margin:20px 0 28px;color:var(--muted);font-size:16px;max-width:460px}
+.hero-actions{display:flex;flex-wrap:wrap;gap:10px}
+.term{background:#050807;border:1px solid var(--line);border-radius:10px;overflow:hidden;box-shadow:0 0 60px rgba(0,229,139,.08)}
+.term-bar{display:flex;align-items:center;gap:7px;padding:11px 14px;border-bottom:1px solid var(--line);background:var(--panel)}
+.term-bar i{width:10px;height:10px;border-radius:50%;background:#26332b}.term-bar span{margin-left:8px;color:var(--muted);font:12px var(--mono)}
+.term pre{padding:18px;min-height:300px;font:12.5px/1.75 var(--mono);color:#c5d8cb;overflow-x:auto;white-space:pre-wrap;word-break:break-word}
+.k{color:var(--green)}.s{color:#9fd8ff}.n{color:var(--warn)}.c{color:#5f7066}
+.caret{display:inline-block;width:7px;height:14px;background:var(--green);vertical-align:-2px;animation:blink 1s steps(2) infinite}@keyframes blink{to{opacity:0}}
+section{padding:64px 0}
+.section-heading{max-width:620px;margin-bottom:30px}
+.tag{display:inline-block;font:12px var(--mono);color:var(--green);margin-bottom:10px}
+h2{font:800 clamp(26px,4.2vw,36px)/1.2 var(--mono);letter-spacing:-1px}.section-heading p{margin-top:12px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.card{padding:22px;background:var(--panel);border:1px solid var(--line);border-left:2px solid var(--green);border-radius:6px}
+.card h3{margin-bottom:8px;font:700 16px var(--mono)}.card p{color:var(--muted);font-size:14px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:22px}
+.ep{display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding-bottom:16px;border-bottom:1px solid var(--line);font:14px var(--mono)}
+.m{background:var(--dim);color:var(--green);padding:3px 9px;border-radius:4px;font-weight:700}
+.copy{margin-left:auto;padding:6px 12px;font-size:12px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px}
+.cols h4,.label-sm{font:12px var(--mono);color:var(--muted);margin-bottom:8px;font-weight:400}
+code.block,pre.block{display:block;background:#050807;border:1px solid var(--line);border-radius:6px;padding:14px;font:12.5px/1.7 var(--mono);color:#c5d8cb;overflow-x:auto;white-space:pre}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:22px 0 10px}
+.tab{padding:7px 12px;border:1px solid var(--line);border-radius:4px;background:transparent;color:var(--muted);font:12px var(--mono)}
+.tab[aria-selected=true]{border-color:var(--green);color:var(--green);background:#08150f}
+table{width:100%;border-collapse:collapse;margin-top:22px;font-size:13px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:12px var(--mono);color:var(--muted);font-weight:400}td:first-child{font-family:var(--mono);color:var(--green);white-space:nowrap}td:nth-child(2){font-family:var(--mono);color:var(--muted)}
+.tw{overflow-x:auto}
+.field{display:block;margin-bottom:12px}.field span{display:block;font:12px var(--mono);color:var(--muted);margin-bottom:5px}
+.in,.key-box{width:100%;padding:11px 12px;background:#050807;color:var(--text);border:1px solid var(--line);border-radius:6px;font:13px var(--mono)}
+.in:focus,.key-box:focus{border-color:var(--green);outline:0}
+.out{min-height:200px}
+.qr-box{display:grid;place-items:center;min-height:200px;border:1px dashed var(--line);border-radius:6px;margin-top:12px;color:var(--muted);font:12px var(--mono);padding:10px;text-align:center}
+.qr-box img{max-width:200px;background:#fff;padding:8px;border-radius:6px}
+.cta{padding:38px 22px;text-align:center;background:linear-gradient(135deg,#0b1e15,var(--panel));border:1px solid var(--dim);border-radius:10px}
+.cta p.sub{max-width:520px;margin:12px auto 22px;color:var(--muted)}
+.status{max-width:600px;margin:16px auto 0;color:var(--muted);font:13px var(--mono);overflow-wrap:anywhere}
+.dashboard{max-width:680px;margin:24px auto 0;padding:22px;text-align:left;background:#050807;border:1px solid var(--dim);border-radius:8px}
+.dashboard-row{display:flex;justify-content:space-between;gap:20px;padding:12px 0;border-bottom:1px solid var(--line)}
+.label{color:var(--muted)}.value{overflow-wrap:anywhere;text-align:right}
+.dashboard-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}.hidden{display:none!important}
+footer{padding:26px 0;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+.footer-inner{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px}
+.footer-inner a:hover{color:var(--green)}
+@media(max-width:800px){.hero-grid,.cols,.grid{grid-template-columns:1fr}.hero{padding-top:44px}.nav-links .optional{display:none}.dashboard-row{flex-direction:column;gap:2px}.value{text-align:left}.copy{margin-left:0}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
 <body>
 <header><div class="container"><nav>
 <a href="#" class="logo">Eren<span>Api</span></a>
-<div class="nav-links"><a href="#features">Features</a><a href="#docs">API Docs</a><a class="optional" href="#security">Security</a><a class="button primary" href="#get-started">Get Started ↗</a></div>
+<div class="nav-links"><a class="optional" href="#overview">Overview</a><a href="#docs">Docs</a><a href="#console">Test console</a><a class="button primary" href="#get-started">Get started</a></div>
 </nav></div></header>
+
 <main>
-<section class="hero"><div class="container">
-<div class="badge"><span class="dot"></span>PAYMENT VERIFICATION API · V1</div>
-<h1>Verify payment notifications<br><span>in one request.</span></h1>
-<p>A developer-focused payment verification API. Verify incoming payment notifications using a transaction ID or UTR, with exact amount matching and duplicate protection.</p>
-<div class="hero-actions"><a href="#get-started" class="button primary">Get Started →</a><a href="#docs" class="button">Explore API Docs</a></div>
-<div class="stats"><div class="stat"><strong>UTR + Transaction ID</strong><small>Flexible matching</small></div><div class="stat"><strong>Private Inbox</strong><small>Isolated per merchant</small></div><div class="stat"><strong>JSON API</strong><small>Developer friendly</small></div></div>
+<section class="hero"><div class="container hero-grid">
+<div>
+<div class="live"><span class="dot"></span>v1 · all systems operational</div>
+<h1>Did the payment land? One request.</h1>
+<p class="lead">Verify a UPI payment by UTR or transaction ID against your own connected inbox. Plain JSON answer, exact amount match, and no payment is ever counted twice.</p>
+<div class="hero-actions"><a href="#get-started" class="button primary">Get your API key</a><a href="#docs" class="button">Read the docs</a></div>
+</div>
+<div class="term" aria-label="Example request and response">
+<div class="term-bar"><i></i><i></i><i></i><span>verify.sh</span></div>
+<pre id="termOut"></pre>
+</div>
 </div></section>
-<section id="features"><div class="container">
-<div class="section-heading"><div class="eyebrow">BUILT FOR DEVELOPERS</div><h2>Payment verification, made simple.</h2><p>Build a verification workflow that checks actual payment notifications instead of trusting screenshots or user claims.</p></div>
+
+<section id="overview"><div class="container">
+<div class="section-heading"><span class="tag">// overview</span><h2>One job, done properly.</h2><p>It answers a single question: did the payment arrive or not. Nothing else to learn, nothing else to break.</p></div>
 <div class="grid">
-<article class="card"><div class="icon">✓</div><h3>Transaction matching</h3><p>Match a payment using its transaction ID or UTR and optionally require an exact amount.</p></article>
-<article class="card"><div class="icon">⌁</div><h3>Private Gmail connection</h3><p>Each merchant authorizes access to their own inbox, with tokens protected on the server.</p></article>
-<article class="card"><div class="icon">⌘</div><h3>Duplicate protection</h3><p>Record verified transaction identifiers and prevent the same payment from being credited more than once.</p></article>
+<article class="card"><h3>Your own API key</h3><p>Every merchant gets a private key. Nothing is shared between accounts, and you can regenerate it any time.</p></article>
+<article class="card"><h3>Runs off your inbox</h3><p>Connect the Gmail inbox where payment notifications land. Each merchant's inbox stays fully separate.</p></article>
+<article class="card"><h3>UTR and transaction ID</h3><p>Verify by UTR, or by transaction ID when there is no UTR. Add an exact amount, and the same payment is never credited twice.</p></article>
 </div></div></section>
+
 <section id="docs"><div class="container">
-<div class="section-heading"><div class="eyebrow">API DOCUMENTATION</div><h2>One request. One clear answer.</h2><p>Example request structure for the planned verification endpoint. Payment verification will work after its trusted inbox integration and secure backend are configured.</p></div>
-<div class="api-panel"><div class="api-top"><div><span class="method">POST</span><code>/api/v1/payment/verify</code></div><span class="badge" style="margin:0">JSON · V1</span></div>
-<pre>{
-  "transaction_id": "FMPIB1234567890",
+<div class="section-heading"><span class="tag">// docs</span><h2>API documentation</h2><p>One verify endpoint, one QR endpoint. Bearer auth, JSON in and out.</p></div>
+<div class="panel">
+<div class="ep"><span class="m">POST</span><code>/api/v1/payment/verify</code><button class="button copy" type="button" id="copyCurl">Copy cURL</button></div>
+<div class="label-sm" style="margin-top:16px">Header</div>
+<code class="block">Authorization: Bearer YOUR_API_KEY</code>
+<div class="cols">
+<div><h4>Request by UTR</h4><code class="block">{
+  "utr": "130560623583",
   "amount": 100
-}</pre><div class="note">Authentication: Bearer API key. Never place private API keys or Gmail OAuth tokens in frontend JavaScript.</div></div>
+}</code></div>
+<div><h4>Request by transaction ID</h4><code class="block">{
+  "transaction_id": "FMPIB6709441622",
+  "amount": 100
+}</code></div>
+</div>
+<p style="color:var(--muted);font-size:13px;margin-top:12px">amount is optional. When sent, it must match exactly.</p>
+<div class="tabs" role="tablist">
+<button class="tab" role="tab" aria-selected="true" data-r="ok">Payment received</button>
+<button class="tab" role="tab" aria-selected="false" data-r="nf">Not found</button>
+<button class="tab" role="tab" aria-selected="false" data-r="dup">Already verified</button>
+<button class="tab" role="tab" aria-selected="false" data-r="err">Error</button>
+</div>
+<pre class="block" id="respView"></pre>
+<div class="tw"><table>
+<tr><th>Field</th><th>Type</th><th>Meaning</th></tr>
+<tr><td>success</td><td>boolean</td><td>The request itself went through.</td></tr>
+<tr><td>received</td><td>boolean</td><td>The payment was found and matched.</td></tr>
+<tr><td>amount</td><td>number</td><td>Amount that came in. null when nothing matched.</td></tr>
+<tr><td>transaction_id</td><td>string</td><td>Matched transaction ID.</td></tr>
+<tr><td>utr</td><td>string</td><td>UTR from the payment email, if present.</td></tr>
+<tr><td>sender_name</td><td>string</td><td>Name of the payer, or null.</td></tr>
+<tr><td>already_verified</td><td>boolean</td><td>Same payment verified before. Never credit it twice.</td></tr>
+</table></div>
+<div class="tw"><table>
+<tr><th>HTTP</th><th></th><th>When</th></tr>
+<tr><td>200</td><td></td><td>Verification ran. Check received for the result.</td></tr>
+<tr><td>400</td><td></td><td>Broken JSON, or missing or badly formatted utr / transaction_id.</td></tr>
+<tr><td>401</td><td></td><td>API key missing or wrong.</td></tr>
+<tr><td>500</td><td></td><td>Server problem, usually the Gmail connection.</td></tr>
+</table></div>
+</div>
+<div class="panel" style="margin-top:16px">
+<div class="ep"><span class="m">GET</span><code>/api/v1/qr</code></div>
+<p style="color:var(--muted);font-size:14px;margin:14px 0 10px">Optional. Returns a standard upi://pay QR as an SVG image. Skip it if you already have your own QR.</p>
+<code class="block" id="qrUrlDoc"></code>
+</div>
 </div></section>
-<section id="security"><div class="container">
-<div class="section-heading"><div class="eyebrow">SECURITY FIRST</div><h2>Designed with safety in mind.</h2><p>A payment should only be accepted after the backend independently confirms a matching notification and records the transaction safely.</p></div>
-<div class="grid">
-<article class="card"><h3>🔐 Protected credentials</h3><p>Store OAuth credentials and secret API keys on the server, not in publicly accessible files.</p></article>
-<article class="card"><h3>🛡️ Server-side checks</h3><p>Validate the amount, transaction identifier, merchant ownership and transaction status before returning success.</p></article>
-<article class="card"><h3>⚡ Safe retries</h3><p>Use unique transaction identifiers to avoid duplicate credits during retries and simultaneous requests.</p></article>
-</div></div></section>
+
+<section id="console"><div class="container">
+<div class="section-heading"><span class="tag">// console</span><h2>Test console</h2><p>Send a real request and see exactly what your bot or site will get back. Avoid pasting your key on a shared computer.</p></div>
+<div class="cols" style="margin-top:0">
+<div class="panel">
+<label class="field"><span>API key</span><input class="in" id="tcKey" type="password" autocomplete="off" placeholder="er_live_..."></label>
+<label class="field"><span>Transaction ID (optional)</span><input class="in" id="tcTid" placeholder="FMPIB6709441622"></label>
+<label class="field"><span>UTR (optional)</span><input class="in" id="tcUtr" placeholder="130560623583"></label>
+<label class="field"><span>Amount (optional)</span><input class="in" id="tcAmt" inputmode="decimal" placeholder="100"></label>
+<button class="button primary" id="tcSend" type="button">Send request</button>
+</div>
+<div class="panel"><div class="label-sm">Response</div><pre class="block out" id="tcOut">Send a request to see the result.</pre></div>
+</div>
+<div class="cols">
+<div class="panel">
+<div class="label-sm">UPI QR generator</div>
+<label class="field"><span>UPI ID</span><input class="in" id="qrUpi" placeholder="merchant@upi"></label>
+<label class="field"><span>Payee name</span><input class="in" id="qrName" placeholder="My Store"></label>
+<label class="field"><span>Amount</span><input class="in" id="qrAmt" inputmode="decimal" placeholder="100"></label>
+<label class="field"><span>Note</span><input class="in" id="qrNote" placeholder="Order 123"></label>
+<button class="button" id="qrGo" type="button">Generate QR</button>
+</div>
+<div class="panel"><div class="label-sm">Preview</div><div class="qr-box" id="qrBox">Enter a UPI ID and generate.</div></div>
+</div>
+</div></section>
+
 <section id="get-started"><div class="container"><div class="cta">
-<div class="eyebrow">ERENAPI · V1</div><h2 id="ctaTitle">Ready to build with ErenApi?</h2>
-<p id="ctaDescription">Sign in with Google to create your merchant account. Only your Gmail address is used for the basic account profile.</p>
-<button class="button primary" id="startButton" type="button">Continue with Google →</button>
+<span class="tag">// get started</span><h2 id="ctaTitle">Ready to build with ErenApi?</h2>
+<p class="sub" id="ctaDescription">Sign in with Google to create your merchant account. Only your Gmail address is used for the basic account profile.</p>
+<button class="button primary" id="startButton" type="button">Continue with Google</button>
 <p class="status" id="status" role="status" aria-live="polite">You are not signed in.</p>
 <div id="dashboard" class="dashboard hidden">
-<div class="eyebrow">MERCHANT DASHBOARD</div><h3 style="font-size:24px;margin-bottom:12px">Your account</h3>
+<span class="tag">// merchant dashboard</span><h3 style="font:700 22px var(--mono);margin-bottom:10px">Your account</h3>
 <div class="dashboard-row"><span class="label">Signed-in email</span><strong class="value" id="accountEmail">—</strong></div>
 <div class="dashboard-row"><span class="label">Account status</span><strong class="value">Registered</strong></div>
 <div class="dashboard-row"><span class="label">Payment API</span><strong class="value" id="paymentApiStatus">Verification backend pending</strong></div>
 <div style="margin-top:20px">
-<h3 style="font-size:20px;margin-bottom:10px">API Key Management</h3>
-<p style="color:var(--muted);font-size:14px;margin-bottom:15px">Generate a secret API key for your merchant account. Keep it private. Generating a new key may invalidate your previous key.</p>
-<button class="button primary" id="generateKeyButton" type="button">Generate API Key</button>
-<div id="apiKeyResult" class="hidden" style="margin-top:18px">
-<label for="apiKeyOutput" class="label" style="display:block;margin-bottom:8px">Your API Key — Save It Securely</label>
+<h3 style="font:700 18px var(--mono);margin-bottom:8px">API key</h3>
+<p style="color:var(--muted);font-size:14px;margin-bottom:14px">Generate a secret key for your merchant account. Keep it private. A new key replaces the previous one.</p>
+<button class="button primary" id="generateKeyButton" type="button">Generate API key</button>
+<div id="apiKeyResult" class="hidden" style="margin-top:16px">
+<label for="apiKeyOutput" class="label" style="display:block;margin-bottom:8px">Your API key. Save it now.</label>
 <input id="apiKeyOutput" class="key-box" type="password" readonly autocomplete="off">
-<div class="dashboard-actions"><button class="button" id="toggleKeyButton" type="button">Show Key</button><button class="button" id="copyKeyButton" type="button">Copy API Key</button></div>
-<p style="color:#f0c674;font-size:13px;margin-top:12px">Save this key securely. It will not be displayed again after you leave this session.</p>
+<div class="dashboard-actions"><button class="button" id="toggleKeyButton" type="button">Show key</button><button class="button" id="copyKeyButton" type="button">Copy key</button></div>
+<p style="color:var(--warn);font-size:13px;margin-top:12px">This key is shown only once. It disappears when you leave this page.</p>
 </div>
 <p id="keyStatus" class="status" role="status" aria-live="polite"></p>
 </div>
@@ -117,115 +203,151 @@ footer{padding:28px 0;border-top:1px solid var(--border);color:var(--muted);font
 </div>
 </div></div></section>
 </main>
-<footer>
-  <div class="container footer-inner">
-    <a href="#" class="logo">Eren<span>Api</span></a>
 
-    <span>© <span id="year"></span> ErenApi. All rights reserved.</span>
+<footer><div class="container footer-inner">
+<a href="#" class="logo">Eren<span>Api</span></a>
+<span>© <span id="year"></span> ErenApi</span>
+<div style="display:flex;gap:16px;flex-wrap:wrap"><a href="/privacy.html">Privacy policy</a><a href="/terms.html">Terms of service</a></div>
+</div></footer>
 
-    <div style="display:flex;gap:16px;flex-wrap:wrap">
-      <a href="/privacy.html">Privacy Policy</a>
-      <a href="/terms.html">Terms of Service</a>
-    </div>
-
-    <span>Payment verification infrastructure</span>
-  </div>
-</footer>
 <script type="module">
 import {auth,provider,db,ref,set,signInWithPopup,signOut,onAuthStateChanged} from "./firebase.js";
+const $=id=>document.getElementById(id);
+const BASE=location.origin;
+$("year").textContent=new Date().getFullYear();
 
-const startButton=document.getElementById("startButton");
-const logoutButton=document.getElementById("logoutButton");
-const status=document.getElementById("status");
-const dashboard=document.getElementById("dashboard");
-const accountEmail=document.getElementById("accountEmail");
-const ctaTitle=document.getElementById("ctaTitle");
-const ctaDescription=document.getElementById("ctaDescription");
-const generateKeyButton=document.getElementById("generateKeyButton");
-const apiKeyResult=document.getElementById("apiKeyResult");
-const apiKeyOutput=document.getElementById("apiKeyOutput");
-const toggleKeyButton=document.getElementById("toggleKeyButton");
-const copyKeyButton=document.getElementById("copyKeyButton");
-const keyStatus=document.getElementById("keyStatus");
+/* hero terminal */
+const termOut=$("termOut");
+const reqText=`<span class="c">$</span> <span class="k">curl</span> -X POST ${BASE}/api/v1/payment/verify \\
+  -H <span class="s">"Authorization: Bearer er_live_••••"</span> \\
+  -d <span class="s">'{"utr":"130560623583","amount":100}'</span>
+`;
+const resText=`
+{
+  <span class="k">"success"</span>: <span class="n">true</span>,
+  <span class="k">"received"</span>: <span class="n">true</span>,
+  <span class="k">"amount"</span>: <span class="n">100</span>,
+  <span class="k">"currency"</span>: <span class="s">"INR"</span>,
+  <span class="k">"transaction_id"</span>: <span class="s">"FMPIB6709441622"</span>,
+  <span class="k">"utr"</span>: <span class="s">"130560623583"</span>,
+  <span class="k">"message"</span>: <span class="s">"Payment received successfully"</span>
+}`;
+if(matchMedia("(prefers-reduced-motion:reduce)").matches){termOut.innerHTML=reqText+resText;}
+else{
+  const plain=reqText.replace(/<[^>]+>/g,"");let i=0;
+  const tick=()=>{i+=2;termOut.innerHTML=plain.slice(0,i).replace(/&/g,"&amp;")+'<span class="caret"></span>';
+    if(i<plain.length)setTimeout(tick,14);else setTimeout(()=>{termOut.innerHTML=reqText+'<span class="c">…</span>';setTimeout(()=>{termOut.innerHTML=reqText+resText;},500);},400);};
+  tick();
+}
+
+/* docs */
+const R={
+ ok:'{\n  "success": true,\n  "received": true,\n  "amount": 100,\n  "currency": "INR",\n  "transaction_id": "FMPIB6709441622",\n  "utr": "130560623583",\n  "sender_name": "ASHIK J",\n  "date": "2026-10-02T06:25:00+05:30",\n  "message": "Payment received successfully"\n}',
+ nf:'{\n  "success": true,\n  "received": false,\n  "message": "No matching payment found in the last 24 hours"\n}',
+ dup:'{\n  "success": true,\n  "received": false,\n  "already_verified": true,\n  "message": "Payment was already verified"\n}',
+ err:'// HTTP 401\n{\n  "success": false,\n  "message": "Invalid API key"\n}'};
+const respView=$("respView");respView.textContent=R.ok;
+document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>{
+  document.querySelectorAll(".tab").forEach(x=>x.setAttribute("aria-selected",x===t));
+  respView.textContent=R[t.dataset.r];}));
+$("qrUrlDoc").textContent=`GET ${BASE}/api/v1/qr?upi_id=merchant@upi&amount=100&name=My%20Store&note=Order%20123`;
+$("copyCurl").addEventListener("click",async()=>{
+  const c=`curl -X POST ${BASE}/api/v1/payment/verify -H "Authorization: Bearer YOUR_API_KEY" -H "Content-Type: application/json" -d '{"utr":"130560623583","amount":100}'`;
+  try{await navigator.clipboard.writeText(c);$("copyCurl").textContent="Copied";}catch{$("copyCurl").textContent="Copy failed";}
+  setTimeout(()=>$("copyCurl").textContent="Copy cURL",1500);
+});
+
+/* test console */
+$("tcSend").addEventListener("click",async()=>{
+  const key=$("tcKey").value.trim(),tid=$("tcTid").value.trim(),utr=$("tcUtr").value.trim(),amt=$("tcAmt").value.trim();
+  const out=$("tcOut");
+  if(!key){out.textContent="Enter your API key.";return;}
+  if(!tid&&!utr){out.textContent="Enter a UTR or a transaction ID.";return;}
+  const body={};if(utr)body.utr=utr;if(tid)body.transaction_id=tid;if(amt)body.amount=Number(amt);
+  const b=$("tcSend");b.disabled=true;out.textContent="Sending…";
+  try{
+    const r=await fetch("/api/v1/payment/verify",{method:"POST",headers:{"Authorization":"Bearer "+key,"Content-Type":"application/json"},body:JSON.stringify(body)});
+    const txt=await r.text();let pretty=txt;try{pretty=JSON.stringify(JSON.parse(txt),null,2);}catch{}
+    out.textContent="// HTTP "+r.status+"\n"+pretty;
+  }catch(e){out.textContent="Request failed: "+e.message;}
+  finally{b.disabled=false;}
+});
+$("qrGo").addEventListener("click",()=>{
+  const upi=$("qrUpi").value.trim(),box=$("qrBox");
+  if(!upi){box.textContent="Enter a UPI ID first.";return;}
+  const p=new URLSearchParams({upi_id:upi});
+  [["name","qrName"],["amount","qrAmt"],["note","qrNote"]].forEach(([k,id])=>{const v=$(id).value.trim();if(v)p.set(k,v);});
+  const img=new Image();img.alt="UPI QR code";img.src="/api/v1/qr?"+p;
+  img.onerror=()=>{box.textContent="QR endpoint is not available yet.";};
+  box.textContent="";box.appendChild(img);
+});
+
+/* auth + dashboard (unchanged logic) */
+const startButton=$("startButton"),logoutButton=$("logoutButton"),status=$("status"),dashboard=$("dashboard"),
+accountEmail=$("accountEmail"),ctaTitle=$("ctaTitle"),ctaDescription=$("ctaDescription"),
+generateKeyButton=$("generateKeyButton"),apiKeyResult=$("apiKeyResult"),apiKeyOutput=$("apiKeyOutput"),
+toggleKeyButton=$("toggleKeyButton"),copyKeyButton=$("copyKeyButton"),keyStatus=$("keyStatus");
 let generatedKey=null;
 
-document.getElementById("year").textContent=new Date().getFullYear();
-
-function clearDisplayedKey(){
-  generatedKey=null;
-  apiKeyOutput.value="";
-  apiKeyOutput.type="password";
-  apiKeyResult.classList.add("hidden");
-  toggleKeyButton.textContent="Show Key";
-}
+function clearDisplayedKey(){generatedKey=null;apiKeyOutput.value="";apiKeyOutput.type="password";apiKeyResult.classList.add("hidden");toggleKeyButton.textContent="Show key";}
 function showSignedInUser(user){
-  dashboard.classList.remove("hidden");
-  accountEmail.textContent=user.email||"Email unavailable";
-  startButton.classList.add("hidden");
-  ctaTitle.textContent="Welcome to ErenApi";
-  ctaDescription.textContent="Your Google account is connected. Payment verification setup is still pending.";
+  dashboard.classList.remove("hidden");accountEmail.textContent=user.email||"Email unavailable";
+  startButton.classList.add("hidden");ctaTitle.textContent="Welcome to ErenApi";
+  ctaDescription.textContent="Your Google account is connected. Generate an API key to start.";
   status.textContent="You are signed in.";
 }
 function showSignedOut(){
-  clearDisplayedKey();
-  dashboard.classList.add("hidden");
-  startButton.classList.remove("hidden");
+  clearDisplayedKey();dashboard.classList.add("hidden");startButton.classList.remove("hidden");
   ctaTitle.textContent="Ready to build with ErenApi?";
   ctaDescription.textContent="Sign in with Google to create your merchant account. Only your Gmail address is used for the basic account profile.";
-  status.textContent="You are not signed in.";
-  keyStatus.textContent="";
+  status.textContent="You are not signed in.";keyStatus.textContent="";
 }
 onAuthStateChanged(auth,user=>{if(user)showSignedInUser(user);else showSignedOut();});
 
 startButton.addEventListener("click",async()=>{
-  startButton.disabled=true;status.textContent="Opening Google Login...";
+  startButton.disabled=true;status.textContent="Opening Google login…";
   try{
     const result=await signInWithPopup(auth,provider);const user=result.user;
     if(!user.email)throw new Error("Google account email is unavailable.");
-    status.textContent="Saving your account...";
+    status.textContent="Saving your account…";
     await set(ref(db,"merchants/"+user.uid),{email:user.email,registeredAt:new Date().toISOString()});
-    showSignedInUser(user);status.textContent="Google Login successful. Your account is registered.";
+    showSignedInUser(user);status.textContent="Login successful. Your account is registered.";
   }catch(error){
     console.error("Authentication error:",error);
     if(error.code==="auth/popup-closed-by-user")status.textContent="Login cancelled. Please try again.";
-    else if(error.code==="auth/unauthorized-domain")status.textContent="This website domain is not authorized in Firebase.";
-    else if(error.code==="auth/popup-blocked")status.textContent="Google Login popup was blocked. Please allow popups and retry.";
+    else if(error.code==="auth/unauthorized-domain")status.textContent="This domain is not authorized in Firebase.";
+    else if(error.code==="auth/popup-blocked")status.textContent="Login popup was blocked. Allow popups and retry.";
     else status.textContent="Login failed: "+(error.message||"Please try again.");
   }finally{startButton.disabled=false;}
 });
 
 generateKeyButton.addEventListener("click",async()=>{
   const user=auth.currentUser;
-  if(!user){keyStatus.textContent="Please sign in with Google first.";return;}
-  const originalButtonHTML=generateKeyButton.innerHTML;
-  generateKeyButton.disabled=true;
-  generateKeyButton.innerHTML='<span class="btn-spinner" aria-hidden="true"></span> Generating...';
-  keyStatus.textContent="Generating your API key...";
+  if(!user){keyStatus.textContent="Sign in with Google first.";return;}
+  const original=generateKeyButton.innerHTML;
+  generateKeyButton.disabled=true;generateKeyButton.innerHTML='<span class="btn-spinner" aria-hidden="true"></span> Generating…';
+  keyStatus.textContent="Generating your API key…";
   try{
     const idToken=await user.getIdToken();
     const response=await fetch("/api/merchant/key",{method:"POST",headers:{"Authorization":`Bearer ${idToken}`,"Content-Type":"application/json"},body:JSON.stringify({})});
     const data=await response.json();
     if(!response.ok||!data.success||!data.apiKey)throw new Error(data.error||`Request failed (${response.status})`);
     generatedKey=data.apiKey;apiKeyOutput.value=generatedKey;apiKeyOutput.type="password";
-    toggleKeyButton.textContent="Show Key";apiKeyResult.classList.remove("hidden");
+    toggleKeyButton.textContent="Show key";apiKeyResult.classList.remove("hidden");
     keyStatus.textContent="API key generated. Copy it now and store it securely.";
   }catch(error){
     console.error("API key generation failed:",error);
     keyStatus.textContent=error.message||"Unable to generate API key. Please try again.";
-  }finally{
-    generateKeyButton.disabled=false;
-    generateKeyButton.innerHTML=originalButtonHTML;
-  }
+  }finally{generateKeyButton.disabled=false;generateKeyButton.innerHTML=original;}
 });
-
 toggleKeyButton.addEventListener("click",()=>{
   if(!generatedKey)return;const showing=apiKeyOutput.type==="text";
-  apiKeyOutput.type=showing?"password":"text";toggleKeyButton.textContent=showing?"Show Key":"Hide Key";
+  apiKeyOutput.type=showing?"password":"text";toggleKeyButton.textContent=showing?"Show key":"Hide key";
 });
 copyKeyButton.addEventListener("click",async()=>{
   if(!generatedKey){keyStatus.textContent="Generate an API key first.";return;}
-  try{await navigator.clipboard.writeText(generatedKey);keyStatus.textContent="API key copied successfully.";}
-  catch{keyStatus.textContent="Copy failed. Tap Show Key and copy it manually.";}
+  try{await navigator.clipboard.writeText(generatedKey);keyStatus.textContent="API key copied.";}
+  catch{keyStatus.textContent="Copy failed. Tap Show key and copy it manually.";}
 });
 logoutButton.addEventListener("click",async()=>{
   logoutButton.disabled=true;
