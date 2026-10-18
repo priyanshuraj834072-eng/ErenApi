@@ -1,12 +1,15 @@
 import { initializeApp, cert, getApps } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { getDatabase } from "firebase-admin/database";
-import { randomBytes, createHash } from "node:crypto";
+import {
+  randomBytes,
+  createHash,
+  createCipheriv,
+  createDecipheriv
+} from "node:crypto";
 
 function getFirebaseApp() {
-  if (getApps().length > 0) {
-    return getApps()[0];
-  }
+  if (getApps().length > 0) return getApps()[0];
 
   const projectId = process.env.FIREBASE_PROJECT_ID;
   const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
@@ -26,21 +29,52 @@ function getFirebaseApp() {
   });
 }
 
+// Encrypts the key so it can be shown again to its owner.
+// Needs KEY_ENCRYPTION_SECRET (random, 32+ characters) in Vercel env vars.
+function encryptionKey() {
+  const secret = process.env.KEY_ENCRYPTION_SECRET;
+  if (!secret || secret.length < 32) {
+    throw new Error("KEY_ENCRYPTION_SECRET is missing or too short");
+  }
+  return createHash("sha256").update(secret).digest();
+}
+
+function encrypt(text) {
+  const iv = randomBytes(12);
+  const cipher = createCipheriv("aes-256-gcm", encryptionKey(), iv);
+  const data = Buffer.concat([cipher.update(text, "utf8"), cipher.final()]);
+  return {
+    iv: iv.toString("base64"),
+    tag: cipher.getAuthTag().toString("base64"),
+    data: data.toString("base64")
+  };
+}
+
+function decrypt(box) {
+  const decipher = createDecipheriv(
+    "aes-256-gcm",
+    encryptionKey(),
+    Buffer.from(box.iv, "base64")
+  );
+  decipher.setAuthTag(Buffer.from(box.tag, "base64"));
+  return Buffer.concat([
+    decipher.update(Buffer.from(box.data, "base64")),
+    decipher.final()
+  ]).toString("utf8");
+}
+
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    res.setHeader("Allow", "POST");
-    return res.status(405).json({
-      success: false,
-      error: "Method not allowed"
-    });
+  res.setHeader("Cache-Control", "no-store");
+
+  if (req.method !== "GET" && req.method !== "POST") {
+    res.setHeader("Allow", "GET, POST");
+    return res.status(405).json({ success: false, error: "Method not allowed" });
   }
 
   try {
     const app = getFirebaseApp();
 
-    const authorization = req.headers.authorization || "";
-    const match = authorization.match(/^Bearer (.+)$/);
-
+    const match = (req.headers.authorization || "").match(/^Bearer (.+)$/);
     if (!match) {
       return res.status(401).json({
         success: false,
@@ -50,18 +84,39 @@ export default async function handler(req, res) {
 
     const decoded = await getAuth(app).verifyIdToken(match[1]);
     const uid = decoded.uid;
+    const keyRef = getDatabase(app).ref(`merchantApiKeys/${uid}`);
+    const existing = (await keyRef.get()).val();
 
-    const secret = randomBytes(32).toString("hex");
-    const apiKey = `er_live_${uid}_${secret}`;
+    // GET: return the merchant's current key so it stays visible after re-login
+    if (req.method === "GET") {
+      if (existing && existing.encryptedKey && existing.status === "active") {
+        return res.status(200).json({
+          success: true,
+          hasKey: true,
+          apiKey: decrypt(existing.encryptedKey)
+        });
+      }
+      return res.status(200).json({
+        success: true,
+        hasKey: false,
+        hasOldKey: Boolean(existing)
+      });
+    }
 
-    const keyHash = createHash("sha256")
-      .update(apiKey)
-      .digest("hex");
+    // POST: create a new key (replaces the old one)
+    if (existing && existing.createdAt && Date.now() - existing.createdAt < 10000) {
+      return res.status(429).json({
+        success: false,
+        error: "Please wait a few seconds before generating another key"
+      });
+    }
 
-    const db = getDatabase(app);
+    const apiKey = `er_live_${uid}_${randomBytes(32).toString("hex")}`;
+    const keyHash = createHash("sha256").update(apiKey).digest("hex");
 
-    await db.ref(`merchantApiKeys/${uid}`).set({
+    await keyRef.set({
       keyHash,
+      encryptedKey: encrypt(apiKey),
       createdAt: Date.now(),
       status: "active"
     });
@@ -71,13 +126,11 @@ export default async function handler(req, res) {
       message: "API key generated successfully",
       apiKey
     });
-
   } catch (error) {
-    console.error("Merchant API key generation failed");
-
+    console.error("Merchant API key request failed:", error.message);
     return res.status(500).json({
       success: false,
-      error: "Unable to generate API key"
+      error: "Unable to process API key request"
     });
   }
 }
