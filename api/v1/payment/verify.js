@@ -130,7 +130,14 @@ export default async function handler(req, res) {
     const paymentKey = (match.transactionId || match.utr).replace(/[.#$/\[\]]/g, "_");
     const result = await db.ref(`verifiedPayments/${uid}/${paymentKey}`).transaction((current) => {
       if (current) return undefined; // already exists: abort
-      return { verifiedAt: Date.now(), amount: match.amount, utr: match.utr };
+      return {
+        verifiedAt: Date.now(),
+        amount: match.amount,
+        utr: match.utr,
+        transactionId: match.transactionId,
+        senderName: match.senderName,
+        paymentDate: match.date
+      };
     });
 
     if (!result.committed) {
