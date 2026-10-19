@@ -21,12 +21,8 @@ export default async function handler(req, res) {
     const decoded = await getAuth(app).verifyIdToken(match[1]);
     const uid = decoded.uid;
 
-    // Latest 50 verified payments of this merchant only
-    const snap = await getDatabase(app)
-      .ref(`verifiedPayments/${uid}`)
-      .orderByChild("verifiedAt")
-      .limitToLast(50)
-      .get();
+    // This merchant's verified payments only
+    const snap = await getDatabase(app).ref(`verifiedPayments/${uid}`).get();
 
     const payments = [];
     snap.forEach((child) => {
@@ -40,11 +36,13 @@ export default async function handler(req, res) {
         verified_at: v.verifiedAt || null
       });
     });
+
+    // Newest first, latest 50
     payments.sort((a, b) => (b.verified_at || 0) - (a.verified_at || 0));
 
-    return res.status(200).json({ success: true, payments });
+    return res.status(200).json({ success: true, payments: payments.slice(0, 50) });
   } catch (error) {
-    console.error("Payments list failed:", error.message);
+    console.error("Payments list failed:", error.code || "", error.message);
     return res.status(500).json({ success: false, error: "Unable to load payments" });
   }
 }
