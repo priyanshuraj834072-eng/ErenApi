@@ -19,13 +19,18 @@
 .btn.tapped,.tab.tapped{color:transparent!important;pointer-events:none}
 .btn.tapped>*,.tab.tapped>*{visibility:hidden}
 .btn.tapped::after,.tab.tapped::after{content:"";position:absolute;left:50%;top:50%;width:15px;height:15px;margin:-7.5px 0 0 -7.5px;border:2px solid var(--spin);border-right-color:transparent;border-radius:50%;animation:spin .5s linear infinite}
+header{backdrop-filter:none;-webkit-backdrop-filter:none;background:#f7f6ff}
+#topbar{position:fixed;top:0;left:0;height:3px;width:0;background:var(--brand);z-index:60;opacity:0;transition:width 2.5s cubic-bezier(.1,.7,.2,1),opacity .2s}
+#topbar.on{width:85%;opacity:1}
 </style>
 </head>
 <body>
+<div id="topbar"></div>
 <header><div class="container"><nav>
 <a href="/" class="logo"><span class="mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg></span>Eren<span>Api</span></a>
-<div class="nav-links"><a href="/">Home</a><a class="btn btn-primary btn-sm" href="/#get-started">Get API key</a></div>
+<div class="nav-links"><a href="/">Home</a><a class="btn btn-primary btn-sm" id="navCta" href="/#get-started">Sign in</a></div>
 </nav></div></header>
+<script>try{if(localStorage.getItem("eren_in")==="1")document.getElementById("navCta").textContent="Get API key"}catch(e){}</script>
 
 <main class="container" style="padding-bottom:70px">
 <div class="page-head"><h1>API docs</h1><p>Two endpoints. Put your key in the header and send JSON.</p>
@@ -89,9 +94,6 @@
 <p>Returns a standard upi://pay QR as an SVG image. Skip it if you already have your own QR.</p>
 <div class="ep"><span class="m">GET</span><code>/api/v1/qr</code></div>
 <code class="block" id="qrUrlDoc"></code>
-<div class="sub">Or use your saved UPI ID</div>
-<p style="color:var(--muted);font-size:14px;margin-bottom:10px">Save your UPI ID once in the dashboard. Then skip upi_id and send your API key. Only the amount is needed.</p>
-<code class="block" id="qrSavedDoc"></code>
 </div>
 
 <div class="try">
@@ -145,7 +147,6 @@ document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>{
   views[g].textContent=D[g][t.dataset.k];
 }));
 $("qrUrlDoc").textContent=`GET ${BASE}/api/v1/qr?upi_id=merchant@upi&amount=250&name=My%20Store&note=Order%204821`;
-$("qrSavedDoc").textContent=`GET ${BASE}/api/v1/qr?amount=250\nAuthorization: Bearer YOUR_API_KEY`;
 $("copyCurl").addEventListener("click",async()=>{
   const c=`curl -X POST ${BASE}/api/v1/payment/verify -H "Authorization: Bearer YOUR_API_KEY" -H "Content-Type: application/json" -d '{"utr":"428917305561","amount":250}'`;
   try{await navigator.clipboard.writeText(c);$("copyCurl").textContent="Copied";}catch{$("copyCurl").textContent="Copy failed";}
@@ -278,11 +279,8 @@ if (data.success && data.received && !data.already_verified) {
 
 === GET /api/v1/qr ===
 Returns a standard upi://pay QR code as an SVG image. Optional. Skip it if you already have your own QR.
-Query parameters: upi_id, amount, name (payee name), note. amount, name and note are optional.
+Query parameters: upi_id (required), amount, name (payee name), note. amount, name and note are optional.
 Example: ${BASE}/api/v1/qr?upi_id=merchant@upi&amount=250&name=My%20Store&note=Order%204821
-Saved UPI ID: the merchant can save a UPI ID in the dashboard. Then skip upi_id and send the API key:
-GET ${BASE}/api/v1/qr?amount=250
-Authorization: Bearer YOUR_API_KEY
 
 Typical flow for an integration:
 1. Show the customer a QR (or your UPI ID) and the amount.
@@ -306,6 +304,14 @@ document.addEventListener("click",e=>{
   if(!el||el.disabled||el.classList.contains("tapped"))return;
   el.classList.add("tapped");
   setTimeout(()=>el.classList.remove("tapped"),350);
+});
+
+/* instant feedback when moving to another page */
+document.addEventListener("click",e=>{
+  const a=e.target.closest("a[href]");
+  if(!a)return;
+  const u=new URL(a.href,location.href);
+  if(u.origin===location.origin&&u.pathname!==location.pathname)document.getElementById("topbar").classList.add("on");
 });
 </script>
 </body>

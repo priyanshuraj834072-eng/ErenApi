@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#5a3cff">
+<meta name="robots" content="noindex">
+<title>Received payments: ErenApi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap"></noscript>
+<link rel="stylesheet" href="/style.css">
+<style>
+*{-webkit-tap-highlight-color:transparent}
+.btn,.tab{position:relative;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;--spin:var(--brand)}
+.btn-primary{--spin:#fff}
+.btn.tapped,.tab.tapped{color:transparent!important;pointer-events:none}
+.btn.tapped>*,.tab.tapped>*{visibility:hidden}
+.btn.tapped::after,.tab.tapped::after{content:"";position:absolute;left:50%;top:50%;width:15px;height:15px;margin:-7.5px 0 0 -7.5px;border:2px solid var(--spin);border-right-color:transparent;border-radius:50%;animation:spin .5s linear infinite}
+header{backdrop-filter:none;-webkit-backdrop-filter:none;background:#f7f6ff}
+#topbar{position:fixed;top:0;left:0;height:3px;width:0;background:var(--brand);z-index:60;opacity:0;transition:width 2.5s cubic-bezier(.1,.7,.2,1),opacity .2s}
+#topbar.on{width:85%;opacity:1}
+.phead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:6px}
+.prow{display:flex;justify-content:space-between;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}
+.prow>div{display:flex;flex-direction:column;min-width:0}
+.prow strong{font:800 20px var(--head)}
+.prow span{font-size:14px;overflow-wrap:anywhere}
+.prow small{color:var(--muted);font:12px var(--mono);overflow-wrap:anywhere}
+.prow time{color:var(--muted);font-size:12px;text-align:right;white-space:nowrap}
+.pempty{color:var(--muted);font-size:14px;padding:10px 0}
+</style>
+</head>
+<body>
+<div id="topbar"></div>
+<header><div class="container"><nav>
+<a href="/" class="logo"><span class="mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg></span>Eren<span>Api</span></a>
+<div class="nav-links"><a href="/docs.html">Docs</a><a class="btn btn-primary btn-sm" href="/#get-started">Dashboard</a></div>
+</nav></div></header>
+
+<main class="container" style="padding-bottom:70px">
+<div class="page-head"><h1>Received payments</h1><p>Every payment that was verified through your API key, newest first.</p></div>
+<div class="panel">
+<div class="phead"><h2 style="font-size:22px">Latest payments</h2><button class="btn btn-sm" id="refreshPayments" type="button">Refresh</button></div>
+<div id="paymentsList"><p class="pempty">Loading…</p></div>
+</div>
+</main>
+
+<footer><div class="container footer-inner">
+<a href="/" class="logo"><span class="mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg></span>Eren<span>Api</span></a>
+<span>© <span id="year"></span> ErenApi</span>
+<div style="display:flex;gap:18px;flex-wrap:wrap"><a href="/docs.html">Docs</a><a href="/privacy.html">Privacy policy</a><a href="/terms.html">Terms of service</a></div>
+</div></footer>
+
+<script type="module">
+const $=id=>document.getElementById(id);
+$("year").textContent=new Date().getFullYear();
+const plist=$("paymentsList");
+
+let auth,onAuthStateChanged;
+// Firebase loads right after the page, so the page itself opens fast
+const fbReady=new Promise(res=>{
+  const go=async()=>{
+    const m=await import("./firebase.js");
+    ({auth,onAuthStateChanged}=m);
+    res();
+  };
+  if(document.readyState==="complete")setTimeout(go,0);
+  else addEventListener("load",()=>setTimeout(go,0),{once:true});
+});
+
+function fmtDate(iso,ms){
+  const d=iso?new Date(iso):new Date(ms);
+  return isNaN(d)?"":d.toLocaleString("en-IN",{dateStyle:"medium",timeStyle:"short"});
+}
+function message(text,linkText,href){
+  plist.textContent="";
+  const p=document.createElement("p");p.className="pempty";p.textContent=text+" ";
+  if(href){const a=document.createElement("a");a.href=href;a.textContent=linkText;a.style.color="var(--brand-d)";a.style.fontWeight="700";p.appendChild(a);}
+  plist.appendChild(p);
+}
+function renderPayments(items){
+  if(!items.length){message("No verified payments yet. They show up here after your site verifies one.");return;}
+  plist.textContent="";
+  items.forEach(it=>{
+    const row=document.createElement("div");row.className="prow";
+    const left=document.createElement("div");
+    const a=document.createElement("strong");a.textContent="₹"+it.amount;
+    const n=document.createElement("span");n.textContent=it.sender_name||"Unknown payer";
+    const u=document.createElement("small");u.textContent=it.utr?("UTR "+it.utr):it.id;
+    left.append(a,n,u);
+    const t=document.createElement("time");t.textContent=fmtDate(it.date,it.verified_at);
+    row.append(left,t);plist.appendChild(row);
+  });
+}
+async function loadPayments(){
+  if(!auth||!auth.currentUser)return;
+  plist.textContent="Loading…";
+  try{
+    const tk=await auth.currentUser.getIdToken();
+    const r=await fetch("/api/merchant/payments",{headers:{"Authorization":"Bearer "+tk}});
+    const d=await r.json().catch(()=>({}));
+    if(!r.ok||!d.success)throw new Error(d.error||"Could not load payments");
+    renderPayments(d.payments);
+  }catch(e){message(e.message||"Could not load payments");}
+}
+$("refreshPayments").addEventListener("click",loadPayments);
+fbReady.then(()=>{
+  onAuthStateChanged(auth,user=>{
+    if(user)loadPayments();
+    else message("Please sign in to see your payments.","Go to sign in","/#get-started");
+  });
+});
+
+/* short press animation on every button */
+document.addEventListener("click",e=>{
+  const el=e.target.closest(".btn,.tab");
+  if(!el||el.disabled||el.classList.contains("tapped"))return;
+  el.classList.add("tapped");
+  setTimeout(()=>el.classList.remove("tapped"),350);
+});
+/* instant feedback when moving to another page */
+document.addEventListener("click",e=>{
+  const a=e.target.closest("a[href]");
+  if(!a)return;
+  const u=new URL(a.href,location.href);
+  if(u.origin===location.origin&&u.pathname!==location.pathname)$("topbar").classList.add("on");
+});
+</script>
+</body>
+</html>
