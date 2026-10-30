@@ -22,6 +22,9 @@
 header{backdrop-filter:none;-webkit-backdrop-filter:none;background:#f7f6ff}
 #topbar{position:fixed;top:0;left:0;height:3px;width:0;background:var(--brand);z-index:60;opacity:0;transition:width 2.5s cubic-bezier(.1,.7,.2,1),opacity .2s}
 #topbar.on{width:85%;opacity:1}
+.copygrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:20px}
+.copygrid p{color:var(--muted);font-size:13px;margin-top:6px}.copygrid .btn{width:100%}
+@media(max-width:820px){.copygrid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -33,9 +36,12 @@ header{backdrop-filter:none;-webkit-backdrop-filter:none;background:#f7f6ff}
 <script>try{if(localStorage.getItem("eren_in")==="1")document.getElementById("navCta").textContent="Get API key"}catch(e){}</script>
 
 <main class="container" style="padding-bottom:70px">
-<div class="page-head"><h1>API docs</h1><p>Two endpoints. Put your key in the header and send JSON.</p>
-<div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-primary" id="copyBasic" type="button">Copy basic docs</button><button class="btn" id="copyAll" type="button">Copy full docs</button></div>
-<p style="margin-top:8px;color:var(--muted);font-size:13px"><b>Basic:</b> verify by UTR or transaction ID, plus the QR. <b>Full:</b> basic plus the name check. Paste the text into ChatGPT or Claude and ask it to build the integration.</p>
+<div class="page-head"><h1>API docs</h1><p>Pick the system you want, copy its docs, and paste them into ChatGPT or Claude to build the integration.</p>
+<div class="copygrid">
+<div><button class="btn btn-primary" id="copyUtr" type="button">Copy UTR verify docs</button><p>The customer sends the UTR, you verify it.</p></div>
+<div><button class="btn" id="copyName" type="button">Copy Name + UTR verify docs</button><p>Same as UTR verify, plus a payer name check.</p></div>
+<div><button class="btn" id="copyAuto" type="button">Copy Automatic docs</button><p>No UTR needed. A QR with the amount, and the payment is detected by itself.</p></div>
+</div>
 <textarea id="allDocs" class="in hidden" rows="10" readonly style="margin-top:12px"></textarea></div>
 
 <div class="panel">
@@ -90,10 +96,75 @@ header{backdrop-filter:none;-webkit-backdrop-filter:none;background:#f7f6ff}
 </div>
 
 <div class="panel">
+<h2>Automatic payments (orders)</h2>
+<p>No UTR needed. Create an order, show the QR, and ErenApi finds the payment in the merchant's inbox by itself. Your server asks for the order status every 5 seconds.</p>
+<div class="ep"><span class="m">POST</span><code>/api/v1/orders</code></div>
+<div class="sub">Request body</div>
+<pre class="block">{
+  "amount": 28,
+  "reference": "user_42",
+  "expires_in_minutes": 5
+}</pre>
+<div class="sub">Response (HTTP 201)</div>
+<pre class="block">{
+  "success": true,
+  "order_id": "ord_9f2c1a7b3d40",
+  "status": "pending",
+  "amount": 28,
+  "pay_amount": 28.37,
+  "currency": "INR",
+  "reference": "user_42",
+  "expires_at": "2026-10-30T09:35:00.000Z",
+  "expires_in_seconds": 300,
+  "message": "Waiting for payment.",
+  "upi_link": "upi://pay?pa=you@fam&am=28.37&cu=INR",
+  "qr_url": "https://your-site/api/v1/qr?...&format=png"
+}</pre>
+<p style="color:var(--muted);font-size:14px;margin-top:12px">The customer must pay exactly <b>pay_amount</b>. It has a few extra paise so every open order has its own amount. The QR already contains it. Credit the customer <b>amount</b>, not pay_amount.</p>
+<div class="ep" style="margin-top:22px"><span class="m">GET</span><code>/api/v1/orders/{order_id}</code></div>
+<div class="sub">Response when paid</div>
+<pre class="block">{
+  "success": true,
+  "order_id": "ord_9f2c1a7b3d40",
+  "status": "paid",
+  "amount": 28,
+  "pay_amount": 28.37,
+  "credit_amount": 28,
+  "paid_at": "2026-10-30T09:32:10.000Z",
+  "payment": {
+    "amount": 28.37,
+    "transaction_id": "FMPIB2048117735",
+    "utr": "428917305561",
+    "sender_name": "RAHUL S",
+    "date": "2026-10-30T15:02:00+05:30"
+  },
+  "message": "Payment received. Credit the customer."
+}</pre>
+<div class="tw"><table>
+<tr><th>status</th><th>What to do</th></tr>
+<tr><td>pending</td><td>Keep asking every 5 seconds.</td></tr>
+<tr><td>paid</td><td>Credit the customer credit_amount. Stop asking.</td></tr>
+<tr><td>expired</td><td>Stop asking. If late_payment is present, a payment came too late: do not credit it.</td></tr>
+</table></div>
+<div class="tw"><table>
+<tr><th>HTTP</th><th>When</th></tr>
+<tr><td>400</td><td>Bad amount, bad order id, or no saved UPI ID.</td></tr>
+<tr><td>401</td><td>API key missing or wrong.</td></tr>
+<tr><td>402</td><td>Subscription inactive.</td></tr>
+<tr><td>404</td><td>Order not found.</td></tr>
+<tr><td>429</td><td>Too many open orders for this amount. Try again in a few minutes.</td></tr>
+<tr><td>500</td><td>Server problem, usually the Gmail connection.</td></tr>
+</table></div>
+</div>
+
+<div class="panel">
 <h2>UPI QR (optional)</h2>
 <p>Returns a standard upi://pay QR as an SVG image. Skip it if you already have your own QR.</p>
 <div class="ep"><span class="m">GET</span><code>/api/v1/qr</code></div>
 <code class="block" id="qrUrlDoc"></code>
+<div class="sub">Or use your saved UPI ID</div>
+<p style="color:var(--muted);font-size:14px;margin-bottom:10px">Save your UPI ID once in the dashboard. Then skip upi_id and send your API key. Add format=png for a PNG image (works with Telegram).</p>
+<code class="block" id="qrSavedDoc"></code>
 </div>
 
 <div class="try">
@@ -147,6 +218,7 @@ document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>{
   views[g].textContent=D[g][t.dataset.k];
 }));
 $("qrUrlDoc").textContent=`GET ${BASE}/api/v1/qr?upi_id=merchant@upi&amount=250&name=My%20Store&note=Order%204821`;
+$("qrSavedDoc").textContent=`GET ${BASE}/api/v1/qr?amount=250&format=png\nAuthorization: Bearer YOUR_API_KEY`;
 $("copyCurl").addEventListener("click",async()=>{
   const c=`curl -X POST ${BASE}/api/v1/payment/verify -H "Authorization: Bearer YOUR_API_KEY" -H "Content-Type: application/json" -d '{"utr":"428917305561","amount":250}'`;
   try{await navigator.clipboard.writeText(c);$("copyCurl").textContent="Copied";}catch{$("copyCurl").textContent="Copy failed";}
@@ -192,27 +264,23 @@ $("qrGo").addEventListener("click",()=>{
   }).catch(()=>{box.textContent="Could not generate the QR. Check the UPI ID.";});
 });
 
-function buildDocs(full){
-  const q=D.q,r=D.r;
-  const ai=full
-    ?"Instructions for the AI: build only what the user asks for. Optional features (name check, QR code) must not be added unless the user asks for them."
-    :"Instructions for the AI: build only what the user asks for. Do not add features that are not described below.";
-  return `${ai}
-
-ErenApi payment verification API (v1)
+function authText(){
+  return `ErenApi payment verification API (v1)
 Base URL: ${BASE}
 Authentication: send your API key in this header on every request
 Authorization: Bearer YOUR_API_KEY
-All requests and responses are JSON. Never put the API key in frontend code; call the API from your server or bot.
-
-=== POST /api/v1/payment/verify ===
+All requests and responses are JSON. Never put the API key in frontend code; call the API from your server or bot.`;
+}
+function verifyText(withName){
+  const q=D.q,r=D.r;
+  return `=== POST /api/v1/payment/verify ===
 Checks whether a UPI payment (FamPay) really arrived, by looking in the merchant's connected inbox.
-Send a UTR or a transaction ID. Optionally add the amount${full?" and the customer's KYC name":""}.
+Send a UTR or a transaction ID. Optionally add the amount${withName?" and the customer's KYC name":""}.
 
 Request fields:
 - utr (string): UTR of the payment. Send this or transaction_id.
 - transaction_id (string): Transaction ID of the payment (like FMPIB...). Send this or utr.
-- amount (number, optional): when sent, it must match exactly.${full?`
+- amount (number, optional): when sent, it must match exactly.${withName?`
 - expected_name (string, optional): the customer's KYC name. The payer name in the payment email must match it, otherwise the payment is rejected.
 - strict_name (boolean, optional): true accepts only a full name match. Default accepts full or partial.`:""}
 
@@ -221,7 +289,7 @@ ${q.utr}
 
 Request example, by transaction ID:
 ${q.tid}
-${full?`
+${withName?`
 Request example, with name check:
 ${q.name}
 `:""}
@@ -233,7 +301,7 @@ ${r.nf}
 
 Response, already verified (HTTP 200). Never credit this payment again:
 ${r.dup}
-${full?`
+${withName?`
 Response, name mismatch (HTTP 200). The payment is not used up, so a retry with the right name can still succeed:
 ${r.nm}
 `:""}
@@ -248,13 +316,13 @@ Response fields:
 - utr: UTR from the payment email, if it had one.
 - sender_name: name of the payer, or null.
 - date: payment time from the email (ISO format).
-- already_verified: the same payment was verified before. Never credit it twice.${full?`
+- already_verified: the same payment was verified before. Never credit it twice.${withName?`
 - name_match: only when expected_name was sent. Value is full, partial or none.`:""}
 - message: short text explaining the result.
 
 HTTP status codes:
 - 200: verification ran. Read received for the result.
-- 400: broken JSON, or a missing or badly formatted utr / transaction_id / amount${full?" / expected_name":""}.
+- 400: broken JSON, or a missing or badly formatted utr / transaction_id / amount${withName?" / expected_name":""}.
 - 401: API key missing or wrong.
 - 402: subscription inactive.
 - 500: server problem, usually the Gmail connection.
@@ -275,28 +343,135 @@ const res = await fetch("${BASE}/api/v1/payment/verify", {
 const data = await res.json();
 if (data.success && data.received && !data.already_verified) {
   // payment is real: credit the customer now
+}`;
 }
-
-=== GET /api/v1/qr ===
-Returns a standard upi://pay QR code as an SVG image. Optional. Skip it if you already have your own QR.
-Query parameters: upi_id (required), amount, name (payee name), note. amount, name and note are optional.
+function qrText(){
+  return `=== GET /api/v1/qr ===
+Returns a standard upi://pay QR code as an SVG image (add format=png for a PNG image). Optional. Skip it if you already have your own QR.
+Query parameters: upi_id (required unless the merchant saved a UPI ID), amount, name (payee name), note, format. All except upi_id are optional.
 Example: ${BASE}/api/v1/qr?upi_id=merchant@upi&amount=250&name=My%20Store&note=Order%204821
-
-Typical flow for an integration:
-1. Show the customer a QR (or your UPI ID) and the amount.
-2. The customer pays and sends you the UTR or transaction ID.
-3. Your server calls POST /api/v1/payment/verify with that ID and the amount.
-4. Credit the customer only when success and received are true and already_verified is not set.`;
+Saved UPI ID: the merchant can save a UPI ID in the dashboard. Then skip upi_id and send the API key:
+GET ${BASE}/api/v1/qr?amount=250&format=png
+Authorization: Bearer YOUR_API_KEY`;
 }
-function wireCopy(id,full,label){
+function ordersText(){
+  return `=== Automatic payments (orders) ===
+No UTR is needed. Your server creates an order for an amount. ErenApi answers with the exact amount the customer must pay (pay_amount, for example 28.37 for an order of 28) and a QR image. ErenApi finds the payment in the merchant's inbox by itself. Your server asks for the order status every 5 seconds until it is paid or expired.
+
+=== POST /api/v1/orders ===
+Request fields:
+- amount (number): the amount you want to credit, from 1 to 100000, like 28.
+- expires_in_minutes (number, optional): how long the order is valid. Default 5, from 1 to 30.
+- reference (string, optional): your own ID for this order, like a user ID. Up to 100 characters.
+
+Request example:
+{
+  "amount": 28,
+  "reference": "user_42",
+  "expires_in_minutes": 5
+}
+
+Response example (HTTP 201):
+{
+  "success": true,
+  "order_id": "ord_9f2c1a7b3d40",
+  "status": "pending",
+  "amount": 28,
+  "pay_amount": 28.37,
+  "currency": "INR",
+  "reference": "user_42",
+  "expires_at": "2026-10-30T09:35:00.000Z",
+  "expires_in_seconds": 300,
+  "message": "Waiting for payment.",
+  "upi_link": "upi://pay?pa=you@fam&am=28.37&cu=INR",
+  "qr_url": "${BASE}/api/v1/qr?upi_id=you@fam&amount=28.37&note=ord_9f2c1a7b3d40&format=png"
+}
+
+Important:
+- The customer must pay exactly pay_amount (not amount). pay_amount has a few extra paise so every open order has its own amount. The QR already contains it.
+- Show the customer pay_amount and the QR from qr_url (a PNG image, it works with Telegram sendPhoto), or give upi_link.
+- Credit the customer amount (28), never pay_amount.
+- Save the order_id.
+
+=== GET /api/v1/orders/{order_id} ===
+Ask every 5 seconds until status is paid or expired.
+
+Response, waiting (HTTP 200):
+{ "success": true, "order_id": "ord_9f2c1a7b3d40", "status": "pending", "amount": 28, "pay_amount": 28.37, "expires_in_seconds": 210, "message": "Waiting for payment." }
+
+Response, paid (HTTP 200):
+{
+  "success": true,
+  "order_id": "ord_9f2c1a7b3d40",
+  "status": "paid",
+  "amount": 28,
+  "pay_amount": 28.37,
+  "credit_amount": 28,
+  "paid_at": "2026-10-30T09:32:10.000Z",
+  "payment": { "amount": 28.37, "transaction_id": "FMPIB2048117735", "utr": "428917305561", "sender_name": "RAHUL S", "date": "2026-10-30T15:02:00+05:30" },
+  "message": "Payment received. Credit the customer."
+}
+
+Response, expired (HTTP 200):
+{ "success": true, "order_id": "ord_9f2c1a7b3d40", "status": "expired", "amount": 28, "pay_amount": 28.37, "message": "Order expired." }
+
+Response, expired but a payment came too late (HTTP 200). Do not credit it:
+{ "success": true, "order_id": "ord_9f2c1a7b3d40", "status": "expired", "late_payment": { "amount": 28.37, "utr": "428917305561", "sender_name": "RAHUL S" }, "message": "A payment arrived after the order expired. Do not credit it." }
+
+Status values:
+- pending: keep asking every 5 seconds.
+- paid: credit the customer credit_amount and stop asking.
+- expired: stop asking. Never credit an expired order.
+
+HTTP status codes:
+- 200: ok. Read status.
+- 400: bad amount, bad order id, or the merchant has no saved UPI ID.
+- 401: API key missing or wrong.
+- 402: subscription inactive.
+- 404: order not found.
+- 429: too many open orders for this amount. Try again in a few minutes.
+- 500: server problem, usually the Gmail connection.
+
+Rules:
+- Credit the customer only when status is "paid", and only once per order_id.
+- An order can be paid only once. One payment can only pay one order.
+
+JavaScript example:
+const create = await fetch("${BASE}/api/v1/orders", {
+  method: "POST",
+  headers: { "Authorization": "Bearer YOUR_API_KEY", "Content-Type": "application/json" },
+  body: JSON.stringify({ amount: 28, reference: "user_42" })
+});
+const order = await create.json();
+// show order.pay_amount and the QR image order.qr_url to the customer
+let status = "pending";
+while (status === "pending") {
+  await new Promise(r => setTimeout(r, 5000));
+  const check = await fetch("${BASE}/api/v1/orders/" + order.order_id, {
+    headers: { "Authorization": "Bearer YOUR_API_KEY" }
+  });
+  const data = await check.json();
+  status = data.status;
+  if (status === "paid") { /* credit data.credit_amount to the customer now */ }
+}`;
+}
+function buildDocs(mode){
+  const intro=mode==="name"
+    ?"Instructions for the AI: build only what the user asks for. Optional features (name check) must not be added unless the user asks for them."
+    :"Instructions for the AI: build only what the user asks for. Do not add features that are not described below.";
+  if(mode==="auto")return `${intro}\n\n${authText()}\n\n${ordersText()}`;
+  return `${intro}\n\n${authText()}\n\n${verifyText(mode==="name")}\n\n${qrText()}\n\nTypical flow for an integration:\n1. Show the customer a QR (or your UPI ID) and the amount.\n2. The customer pays and sends you the UTR or transaction ID.\n3. Your server calls POST /api/v1/payment/verify with that ID and the amount.\n4. Credit the customer only when success and received are true and already_verified is not set.`;
+}
+function wireCopy(id,mode,label){
   $(id).addEventListener("click",async()=>{
-    const t=buildDocs(full),b=$(id),ta=$("allDocs");
+    const t=buildDocs(mode),b=$(id),ta=$("allDocs");
     try{await navigator.clipboard.writeText(t);ta.classList.add("hidden");b.textContent="Copied";setTimeout(()=>b.textContent=label,2000);}
     catch{ta.value=t;ta.classList.remove("hidden");ta.select();b.textContent="Copy from the box below";}
   });
 }
-wireCopy("copyBasic",false,"Copy basic docs");
-wireCopy("copyAll",true,"Copy full docs");
+wireCopy("copyUtr","utr","Copy UTR verify docs");
+wireCopy("copyName","name","Copy Name + UTR verify docs");
+wireCopy("copyAuto","auto","Copy Automatic docs");
 
 /* short press animation on every button */
 document.addEventListener("click",e=>{
