@@ -63,14 +63,28 @@ export default async function handler(req, res) {
       params.push(`tn=${encodeURIComponent(note)}`);
     }
 
-    const svg = await QRCode.toString(`upi://pay?${params.join("&")}`, {
+    const text = `upi://pay?${params.join("&")}`;
+    res.setHeader("Cache-Control", usedSaved ? "private, no-store" : "public, max-age=3600");
+
+    // format=png gives an image that bots (Telegram) and scanner apps accept
+    if (req.query.format === "png") {
+      const png = await QRCode.toBuffer(text, {
+        type: "png",
+        errorCorrectionLevel: "M",
+        margin: 4,
+        width: 600,
+        color: { dark: "#000000", light: "#ffffff" }
+      });
+      res.setHeader("Content-Type", "image/png");
+      return res.status(200).send(png);
+    }
+
+    const svg = await QRCode.toString(text, {
       type: "svg",
       errorCorrectionLevel: "M",
       margin: 2
     });
-
     res.setHeader("Content-Type", "image/svg+xml");
-    res.setHeader("Cache-Control", usedSaved ? "private, no-store" : "public, max-age=3600");
     return res.status(200).send(svg);
   } catch (error) {
     console.error("QR generation failed:", error.message);
