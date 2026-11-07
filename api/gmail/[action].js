@@ -4,8 +4,9 @@ import { getFirebaseApp } from "../../lib/firebase.js";
 import { encrypt, decrypt, signState, verifyState } from "../../lib/crypto.js";
 
 const SCOPE = "https://www.googleapis.com/auth/gmail.readonly";
-const REDIRECT_URI =
-  process.env.GMAIL_REDIRECT_URI || "https://fampayerenapi.vercel.app/api/gmail/callback";
+// The redirect link always uses the website the merchant is on (it must be added in Google Cloud)
+const redirectUriFor = (req) =>
+  process.env.GMAIL_REDIRECT_URI || `https://${req.headers.host}/api/gmail/callback`;
 
 function json(res, status, body) {
   res.setHeader("Cache-Control", "no-store");
@@ -60,7 +61,7 @@ export default async function handler(req, res) {
         "https://accounts.google.com/o/oauth2/v2/auth?" +
         new URLSearchParams({
           client_id: process.env.GOOGLE_CLIENT_ID,
-          redirect_uri: REDIRECT_URI,
+          redirect_uri: redirectUriFor(req),
           response_type: "code",
           scope: SCOPE,
           access_type: "offline",
@@ -83,7 +84,7 @@ export default async function handler(req, res) {
         code,
         client_id: process.env.GOOGLE_CLIENT_ID,
         client_secret: process.env.GOOGLE_CLIENT_SECRET,
-        redirect_uri: REDIRECT_URI,
+        redirect_uri: redirectUriFor(req),
         grant_type: "authorization_code"
       });
 
